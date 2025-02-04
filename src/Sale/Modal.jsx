@@ -2,285 +2,377 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
 
 const Modal = ({ showModal, closeModal, item, onSave, tableData }) => {
-    const [fields, setFields] = useState({});
-    const [errors, setErrors] = useState({});
+  const [fields, setFields] = useState({});
+  const [errors, setErrors] = useState({});
+  const [categories, setCategories] = useState([
+    "Capsule",
+    "Cream",
+    "Liquid",
+  ]);
+  const [newCategory, setNewCategory] = useState("");
+  const [isAddCategory, setIsAddCategory] = useState(false);
 
-    const [categories, setCategories] = useState([
-        "Capsule",
-        "Cream",
-        "Liquid",
-    ]);
-    const [newCategory, setNewCategory] = useState("");
-    const [isAddCategory, setIsAddCategory] = useState(false);
+  const addCategory = () => {
+    if (newCategory.trim() && !categories.includes(newCategory)) {
+      setCategories([...categories, newCategory]);
+      setNewCategory("");
+      setIsAddCategory(false);
+      handleChange("category", "");
+    }
+  };
 
-    const addCategory = () => {
-        if (newCategory.trim() && !categories.includes(newCategory)) {
-            setCategories([...categories, newCategory]);
-            setNewCategory("");
-            setIsAddCategory(false);
-            handleChange("category", "");
-        }
-    };
+  // Update fields when item prop changes
+  useEffect(() => {
+    if (item) {
+      setFields({
+        item_code: item.item_code,
+        barcode: item.barcode,
+        name: item.name,
+        category: item.category,
+        quantity: item.quantity,
+        price: item.price,
+        expire_date: item.expire_date
+          ? new Date(item.expire_date).toISOString().split('T')[0]
+          : '',
+        alert_date: item.alert_date
+          ? new Date(item.alert_date).toISOString().split('T')[0]
+          : '',
+        remark: item.remark || ""
+      });
+    } else {
+      setFields({
+        item_code: "",
+        barcode: "",
+        name: "",
+        category: "",
+        quantity: 0,
+        price: 0,
+        expire_date: "",
+        alert_date: "",
+        remark: ""
+      });
+    }
+  }, [item]);
 
-    // Update fields when item prop changes
-    useEffect(() => {
-        if (item) {
-            setFields({
-                itemCode: item.itemCode,
-                barcode: item.barcode,
-                name: item.name,
-                category: item.category,
-                qty: item.qty,
-                price: item.price,
-                expireDate: item.expireDate,
-                alertDate: item.alertDate,
-                remark: item.remark
-            });
-        } else {
-            setFields({
-                itemCode: "",
-                barcode: "",
-                name: "",
-                category: "",
-                qty: 0,
-                price: 0,
-                expireDate: "",
-                alertDate: "",
-                remark: ""
-            });
-        }
-    }, [item]);
+  // Validate form - all fields are now required
+  const validate = () => {
+    const newErrors = {};
 
-    // Validate form
-    const validate = () => {
-        const newErrors = {};
-        const fieldRules = {
-            itemCode: "ItemCode is required!",
-            itemCodeDulicate: "ItemCode can't be duplicated!",
-            barcode: "BarCode is required!",
-            name: "Name is required!",
-            category: "Category is required!",
-            qty: "Qty is required!",
-            price: "Price is required!",
-            expireDate: "ExpireDate is required!",
-        };
+    // Expiration fields are always required now.
+    const requiredFields = [
+      "item_code",
+      "barcode",
+      "name",
+      "category",
+      "quantity",
+      "price",
+      "expire_date",
+      "alert_date"
+    ];
 
-        if (!item) {
-            fieldRules.itemCode = "ItemCode is required!";
-            fieldRules.barcode = "BarCode is required!";
-            fieldRules.name = "Name is required!";
-            fieldRules.category = "Category is required!";
-            fieldRules.qty = "Qty is required!";
-            fieldRules.price = "Price is required!";
-            fieldRules.expireDate = "ExpireDate is required!";
-        }
+    requiredFields.forEach((field) => {
+      if (!fields[field]) {
+        newErrors[field] = `${field.replace("_", " ")} is required!`;
+      }
+    });
 
-        Object.keys(fields).forEach((field) => {
-            if (!fields[field]) {
-                newErrors[field] = fieldRules[field];
-            }
-        });
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-        const existingItemCode = tableData.find((u) => u.itemCode === fields.itemCode);
-        if (existingItemCode) {
-            newErrors.itemCode = "ItemCode already exists!";
-        }
+  const handleChange = (field, value) => {
+    if (field === "category" && value === "Add") {
+      setIsAddCategory(true);
+    }
 
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
+    setFields((prev) => ({ ...prev, [field]: value }));
 
-    // Handle dynamic input changes
-    const handleChange = (field, value) => {
-        if (field === "category" && value === "Add") {
-            setIsAddCategory(true);
-        }
-        setFields({ ...fields, [field]: value });
-        if (errors[field]) {
-            setErrors({ ...errors, [field]: "" });
-        }
-    };
+    if (errors[field]) {
+      setErrors((prevErrors) => ({ ...prevErrors, [field]: "" }));
+    }
+  };
 
-    const handleSubmit = async () => {
-        if (validate()) {
-            try {
-                const updateditem = {
-                    itemCode: fields.itemCode,
-                    barcode: fields.barcode,
-                    name: fields.name,
-                    category: fields.category,
-                    qty: fields.qty,
-                    price: fields.price,
-                    expireDate: fields.expireDate,
-                    alertDate: fields.alertDate,
-                    remark: fields.remark
-                };
+  const queryClient = useQueryClient();
 
-                await onSave(fields);
+  const mutation = useMutation({
+    mutationFn: async (updatedItem) => {
+      const url = item
+        ? `http://localhost:3000/api/update/${item.item_id}`
+        : "http://localhost:3000/api/upload";
+      const method = item ? "put" : "post";
 
-                resetInput();
-                closeModal();
-                /*toast.success(`${item ? "item updated" : "item added"}: ${fields.itemname}`, {
-                    position: "top-right",
-                    autoClose: 2000,
-                });*/
-            } catch (error) {
-                toast.error('An error occurred while updating the item');
-            }
-        }
-    };
+      const formData = new FormData();
+      Object.keys(updatedItem).forEach((key) => {
+        formData.append(key, updatedItem[key]);
+      });
 
-    const handleCancel = () => {
-        resetInput();
-        closeModal();
-    };
+      const response = await axios({
+        method,
+        url,
+        data: formData,
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-    const resetInput = () => {
-        setFields(item ? {
-            itemCode: item.itemCode,
+      return response.data;
+    },
+    onSuccess: (data) => {
+      onSave(data);
+      queryClient.invalidateQueries("tableData");
+      resetInput();
+      closeModal();
+      toast.success(`${item ? "Item updated" : "Item added"} successfully!`);
+    },
+    onError: (error) => {
+      toast.error(`An error occurred: ${error.message}`);
+    }
+  });
+
+  const handleSubmit = () => {
+    if (validate()) {
+      const updatedItem = {
+        item_code: fields.item_code,
+        barcode: fields.barcode,
+        name: fields.name,
+        category: fields.category,
+        quantity: fields.quantity,
+        price: fields.price,
+        expire_date: fields.expire_date,
+        alert_date: fields.alert_date,
+        remark: fields.remark,
+      };
+
+      if (fields.image) {
+        updatedItem.image = fields.image;
+      }
+
+      console.log(updatedItem);
+      mutation.mutate(updatedItem);
+    }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFields({ ...fields, image: file });
+    }
+  };
+
+  const handleCancel = () => {
+    resetInput();
+    closeModal();
+  };
+
+  const resetInput = () => {
+    setFields(
+      item
+        ? {
+            item_code: item.item_code,
             barcode: item.barcode,
             name: item.name,
             category: item.category,
-            qty: item.qty,
+            quantity: item.quantity,
             price: item.price,
-            expireDate: item.expireDate,
-            alertDate: item.alertDate,
-            remark: item.remark
-        } : {
-            itemCode: "",
+            expire_date: item.expire_date,
+            alert_date: item.alert_date,
+            remark: item.remark || ""
+          }
+        : {
+            item_code: "",
             barcode: "",
             name: "",
             category: "",
-            qty: 0,
+            quantity: 0,
             price: 0,
-            expireDate: "",
-            alertDate: "",
+            expire_date: "",
+            alert_date: "",
             remark: ""
-        });
-        setErrors({});
-    };
-
-    return (
-        <AnimatePresence>
-            {showModal && (
-                <motion.div
-                    className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                >
-                    <motion.div
-                        className="bg-white p-8 rounded-lg w-[400px] shadow-lg max-h-[90vh] overflow-y-auto"
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0.8, opacity: 0 }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
-                    >
-                        <h2 className="text-2xl font-bold mb-4">{item ? "Edit" : "Add"} item</h2>
-                        <div>
-                            {["itemCode", "barcode", "name", "category", "qty", "price", "expireDate", "remark"].map((field) => (
-                                <div key={field} className="mb-4">
-                                    {(() => {
-                                        switch (field) {
-                                            case "category":
-                                                return (
-                                                    <div>
-                                                        <select
-                                                            value={fields[field] || ""}
-                                                            onChange={(e) => handleChange(field, e.target.value)}
-                                                            className={`w-full p-2 border rounded-sm ${isAddCategory ? "text-gray-300" : ""} ${errors[field] ? "border-red-500" : ""}`}
-                                                            disabled={isAddCategory}
-                                                        >
-                                                            <option value="">Select a category</option>
-                                                            {categories.map((cat) => (
-                                                                <option key={cat} value={cat}>
-                                                                    {cat}
-                                                                </option>
-                                                            ))}
-
-                                                            <option value="Add">+ Add Category</option>
-                                                        </select>
-
-                                                        {isAddCategory ? (
-                                                            <div className="mt-2 flex items-center gap-2">
-                                                                <input
-                                                                    type="text"
-                                                                    value={newCategory}
-                                                                    onChange={(e) => setNewCategory(e.target.value)}
-                                                                    className="p-2 border rounded-sm w-full"
-                                                                    placeholder="Enter new category"
-                                                                />
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => { addCategory() }}
-                                                                    className="p-2 bg-blue-500 text-white rounded"
-                                                                >
-                                                                    Add
-                                                                </button>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => { setIsAddCategory(false); setNewCategory(""); handleChange("category", ""); }}
-                                                                    className="p-2 bg-gray-300 rounded"
-                                                                >
-                                                                    Cancel
-                                                                </button>
-                                                            </div>
-                                                        )
-                                                            :
-                                                            ''}
-                                                    </div>
-                                                );
-                                            case "expireDate":
-                                                return (
-                                                    <input
-                                                        value={fields[field] || ""}
-                                                        onChange={(e) => handleChange(field, e.target.value)}
-                                                        type="date"
-                                                        className="w-full p-2 border rounded relative z-[9999] bg-white"
-                                                    />
-                                                );
-                                            default:
-                                                return (
-                                                    <input
-                                                        value={fields[field] || ""}
-                                                        onChange={(e) => handleChange(field, e.target.value)}
-                                                        className={`w-full p-2 border rounded-sm ${errors[field] ? "border-red-500" : ""}`}
-                                                        placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
-                                                    />
-                                                );
-                                        }
-                                    })()}
-
-                                    {errors[field] && <p className="text-red-500 text-sm">{errors[field]}</p>}
-                                </div>
-                            ))}
-                        </div>
-
-                        <div className="mt-4 flex justify-between">
-                            <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={handleCancel}
-                                className="px-4 py-2 bg-gray-400 text-white rounded"
-                            >
-                                Cancel
-                            </motion.button>
-                            <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={handleSubmit}
-                                className="px-4 py-2 bg-blue-500 text-white rounded shadow-md"
-                            >
-                                Save
-                            </motion.button>
-                        </div>
-                    </motion.div>
-                </motion.div>
-            )}
-        </AnimatePresence>
+          }
     );
-};
+    setErrors({});
+  };
 
+  return (
+    <AnimatePresence>
+      {showModal && (
+        <motion.div
+          className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <motion.div
+            className="bg-white p-8 rounded-lg w-[400px] shadow-lg max-h-[90vh] overflow-y-auto"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+          >
+            <h2 className="text-2xl font-bold mb-4">
+              {item ? "Edit" : "Add"} item
+            </h2>
+            <div>
+              {[
+                "image",
+                "item_code",
+                "barcode",
+                "name",
+                "category",
+                "quantity",
+                "price",
+                "expire_date",
+                "alert_date",
+                "remark",
+              ].map((field) => (
+                <div key={field} className="mb-4">
+                  {(() => {
+                    switch (field) {
+                      case "image":
+                        return (
+                          <div>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleImageChange}
+                              className="w-full p-2 border rounded-sm"
+                            />
+                            {fields.image && (
+                              <div className="mt-2">
+                                <img
+                                  src={URL.createObjectURL(fields.image)}
+                                  alt="Preview"
+                                  className="w-32 h-32 object-cover border rounded"
+                                />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      case "category":
+                        return (
+                          <div>
+                            <select
+                              value={fields[field] || ""}
+                              onChange={(e) =>
+                                handleChange(field, e.target.value)
+                              }
+                              className={`w-full p-2 border rounded-sm ${
+                                isAddCategory ? "text-gray-300" : ""
+                              } ${errors[field] ? "border-red-500" : ""}`}
+                              disabled={isAddCategory}
+                            >
+                              <option value="">Select a category</option>
+                              {categories.map((cat) => (
+                                <option key={cat} value={cat}>
+                                  {cat}
+                                </option>
+                              ))}
+                              <option value="Add">+ Add Category</option>
+                            </select>
+                            {isAddCategory && (
+                              <div className="mt-2 flex items-center gap-2">
+                                <input
+                                  type="text"
+                                  value={newCategory}
+                                  onChange={(e) =>
+                                    setNewCategory(e.target.value)
+                                  }
+                                  className="p-2 border rounded-sm w-full"
+                                  placeholder="Enter new category"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={addCategory}
+                                  className="p-2 bg-blue-500 text-white rounded"
+                                >
+                                  Add
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setIsAddCategory(false);
+                                    setNewCategory("");
+                                    handleChange("category", "");
+                                  }}
+                                  className="p-2 bg-gray-300 rounded"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      case "expire_date":
+                      case "alert_date":
+                        return (
+                          <div className="mb-4">
+                            <label
+                              htmlFor={field}
+                              className="block mb-1"
+                            >
+                              {field.charAt(0).toUpperCase() +
+                                field.slice(1).replace("_", " ")}
+                            </label>
+                            <input
+                              id={field}
+                              value={fields[field] || ""}
+                              onChange={(e) =>
+                                handleChange(field, e.target.value)
+                              }
+                              type="date"
+                              className="w-full p-2 border rounded-sm"
+                            />
+                          </div>
+                        );
+                      default:
+                        return (
+                          <input
+                            value={fields[field] || ""}
+                            onChange={(e) =>
+                              handleChange(field, e.target.value)
+                            }
+                            className={`w-full p-2 border rounded-sm ${
+                              errors[field] ? "border-red-500" : ""
+                            }`}
+                            placeholder={
+                              field.charAt(0).toUpperCase() + field.slice(1)
+                            }
+                          />
+                        );
+                    }
+                  })()}
+                  {errors[field] && (
+                    <p className="text-red-500 text-sm">{errors[field]}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+  
+            <div className="mt-4 flex justify-between">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleCancel}
+                className="px-4 py-2 bg-gray-400 text-white rounded"
+              >
+                Cancel
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleSubmit}
+                className="px-4 py-2 bg-blue-500 text-white rounded shadow-md"
+              >
+                Save
+              </motion.button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+  
 export default Modal;

@@ -1,9 +1,15 @@
 import Sale from "./Sale/Sale"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 function App() {  
 
   return (
-    <Sale/>
+    <QueryClientProvider client={queryClient}>
+          <Sale/>
+    </QueryClientProvider>
+
   )
 }
 

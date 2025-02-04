@@ -1,17 +1,37 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
 
 const DeleteModal = ({ showModal, closeModal, item, onDelete }) => {
-    const handleDelete = () => {
-        onDelete(item.id);
-        closeModal();
-        /*toast.success(`User deleted: ${user.username}`, {
-            position: "top-right",
-            autoClose: 2000,
-        });*/
-    };
+  const queryClient = useQueryClient();
+
+  const { mutateAsync, isLoading, isError, error } = useMutation({
+    mutationFn: async (itemId) => {
+      const url = `http://localhost:3000/api/deleteitem/${itemId}`;
+      const method = "delete";
+
+      const response = await axios({ method, url });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["items"]);
+      toast.success("Item deleted successfully!");
+      closeModal();
+      onDelete(item.item_id);
+    },
+    onError: (err) => {
+      toast.error(`An error occurred: ${err.message}`);
+    },
+  });
+
+  // Handle delete action
+  const handleDelete = async () => {
+    if (item && item.item_id) {
+      await mutateAsync(item.item_id);
+    }
+  };
 
     return (
         <AnimatePresence>
@@ -31,7 +51,7 @@ const DeleteModal = ({ showModal, closeModal, item, onDelete }) => {
                     >
                         <h2 className="text-2xl font-bold mb-4">Delete item</h2>
                         {console.log(item)}
-                        <p>Are you sure you want to delete {item.itemCode}?</p>
+                        <p>Are you sure you want to delete {item.name}?</p>
                         <div className="mt-4 flex justify-between">
                             <motion.button
                                 whileHover={{ scale: 1.05 }}

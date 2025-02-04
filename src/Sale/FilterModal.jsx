@@ -23,13 +23,13 @@ const FilterModal = ({ showModal, closeModal }) => {
         setSelectedPrice(id);
     }
 
-    //Qty
-    const [qty, setqty] = useState([
+    //quantity
+    const [quantity, setquantity] = useState([
         { id: 1, name: "most" }, { id: 2, name: "less" },
     ]);
-    const [selectedQty, setSelectedQty] = useState(null);
-    const handleQty = (id) => {
-        setSelectedQty(id);
+    const [selectedquantity, setSelectedquantity] = useState(null);
+    const handlequantity = (id) => {
+        setSelectedquantity(id);
     }
 
     //Category
@@ -87,9 +87,9 @@ const FilterModal = ({ showModal, closeModal }) => {
                             </div>
 
                             <div>
-                                <div className="text-sm font-semibold">Most/Less Qty</div>
-                                <select onClick={(e) => handleQty(e.target.value)} className="w-full mt-2 p-2 border rounded">
-                                    {qty.map(({ id, name }) => (
+                                <div className="text-sm font-semibold">Most/Less quantity</div>
+                                <select onClick={(e) => handlequantity(e.target.value)} className="w-full mt-2 p-2 border rounded">
+                                    {quantity.map(({ id, name }) => (
                                         <option key={id} value={id}>{name}</option>
                                     ))}
                                 </select>

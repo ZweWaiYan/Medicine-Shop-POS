@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 
 import DeleteModal from "./DeleteModal";
 import Modal from "./Modal";
@@ -19,76 +21,88 @@ import { MdOutlineCreateNewFolder } from "react-icons/md";
 
 import FilterModal from "./FilterModal";
 
-const Sale = () => {
+const fetchSaleData = async () => {
+  const { data } = await axios.get("/api/allitems");
+  console.log(data)
+  return data;
+};
 
+const Sale = () => {
+/*
   const [saleData, setSaleData] = useState([
     {
-      id: 1,
-      img: img1,
-      itemCode: "001",
+      item_id: 1,
+      image_path: img1,
+      item_code: "001",
       barcode: "123456789",
       name: "Sayar Ko",
       category: "Cream",
-      qty: 10,
+      quantity: 10,
       price: 900,
-      expireDate: "2027-12-31",
-      alertDate: "2027-11-31",
+      expire_date: "2027-12-31",
+      alert_date: "2027-11-31",
       remark: "Famous"
     },
     {
-      id: 2,
-      img: img2,
-      itemCode: "002",
+      item_id: 2,
+      image_path: img2,
+      item_code: "002",
       barcode: "1231234",
       name: "Paracap",
       category: "Capsule",
-      qty: 40,
+      quantity: 40,
       price: 2700,
-      expireDate: "2027-4-31",
-      alertDate: "2027-3-31",
+      expire_date: "2027-4-31",
+      alert_date: "2027-3-31",
       remark: ""
     },
     {
-      id: 3,
-      img: img3,
-      itemCode: "003",
+      item_id: 3,
+      image_path: img3,
+      item_code: "003",
       barcode: "123523",
       name: "Vitamin C",
       category: "Capsule",
-      qty: 100,
+      quantity: 100,
       price: 60,
-      expireDate: "2027-8-31",
-      alertDate: "2027-7-31",
+      expire_date: "2027-8-31",
+      alert_date: "2027-7-31",
       remark: ""
     },
     {
-      id: 4,
-      img: img4,
-      itemCode: "004",
+      item_id: 4,
+      image_path: img4,
+      item_code: "004",
       barcode: "12325434",
       name: "Decolgen",
       category: "Capsule",
-      qty: 100,
+      quantity: 100,
       price: 3500,
-      expireDate: "2027-8-31",
-      alertDate: "2027-7-31",
+      expire_date: "2027-8-31",
+      alert_date: "2027-7-31",
       remark: ""
     },
     {
-      id: 5,
-      img: img5,
-      itemCode: "005",
+      item_id: 5,
+      image_path: img5,
+      item_code: "005",
       barcode: "1231512",
       name: "Voltex",
       category: "Cream",
-      qty: 30,
+      quantity: 30,
       price: 2000,
-      expireDate: "2027-8-31",
-      alertDate: "2027-7-31",
+      expire_date: "2027-8-31",
+      alert_date: "2027-7-31",
       remark: ""
     }
 
-  ]);
+  ]);*/
+
+  const { data: saleData, isLoading, error } = useQuery({
+    queryKey: ["saleData"],
+    queryFn: fetchSaleData,
+  });
+
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
@@ -97,7 +111,10 @@ const Sale = () => {
   const [deleteCurrentItem, setDeleteCurrentItem] = useState(null);
 
   const [searchText, setSearchText] = useState("");
-  const [filterSearchText, setFilterSearchText] = useState("ItemCode");
+  const [filterSearchText, setFilterSearchText] = useState("item_code");
+
+  if (isLoading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error.message}</p>;
 
   const handleCreate = () => {
     console.log(filterSearchText);
@@ -105,15 +122,15 @@ const Sale = () => {
     setShowModal(true);
   };
 
-  const handleEdit = (id) => {
-    const user = saleData.find((row) => row.id === id);
-    setCurrentItem(user);
+  const handleEdit = (item_id) => {
+    const item = saleData.find((row) => row.item_id === item_id);
+    setCurrentItem(item);
     setShowModal(true);
   };
 
-  const handleDelete = (id) => {
-    const user = saleData.find((row) => row.id === id);
-    setDeleteCurrentItem(user);
+  const handleDelete = (item_id) => {
+    const item = saleData.find((row) => row.item_id === item_id);
+    setDeleteCurrentItem(item);
     setShowDeleteModal(true);
   };
 
@@ -128,14 +145,14 @@ const Sale = () => {
   // Filtered data based on search 
   const filteredSaleData = saleData.filter((item) => {
     switch (filterSearchText) {
-      case "ItemCode":
-        return item.itemCode && item.itemCode.toLowerCase().includes(searchText.toLowerCase()); 
+      case "Item Code":
+        return item.item_code && item.item_code.toLowerCase().includes(searchText.toLowerCase()); 
       case "Barcode":
         return item.barcode && item.barcode.toLowerCase().includes(searchText.toLowerCase()); 
       case "Name":
         return item.name && item.name.toLowerCase().includes(searchText.toLowerCase());    
       default:
-        return item.itemCode && item.itemCode.toLowerCase().includes(searchText.toLowerCase()); 
+        return item.item_code && item.item_code.toLowerCase().includes(searchText.toLowerCase()); 
         break;
     }        
   });
@@ -160,7 +177,7 @@ const Sale = () => {
                     onChange={(e) => { setFilterSearchText(e.target.value) }}
                     className="col-start-1 row-start-1 w-full appearance-none rounded-md py-1.5 pr-7 pl-3 text-base text-gray-500 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                   >
-                    <option value="ItemCode">ItemCode</option>
+                    <option value="item_code">item_code</option>
                     <option value="Barcode">BarCode</option>
                     <option value="Name">Name</option>
                   </select>
@@ -199,7 +216,7 @@ const Sale = () => {
         <table className="min-w-full border-collapse border border-gray-300">
           <thead>
             <tr>
-              {["Image", "ItemCode", "Barcode", "Name", "Category", "Qty", "Price", "ExpireDate", "Remark", "Actions"].map((heading) => (
+              {["Image", "item_code", "Barcode", "Name", "Category", "quantity", "Price", "expire_date", "Remark", "Actions"].map((heading) => (
                 <th key={heading} className="px-2 md:px-4 py-2 border text-sm md:text-lg text-center bg-gray-100">
                   {heading}
                 </th>
@@ -209,29 +226,29 @@ const Sale = () => {
           <tbody>
             {filteredSaleData.length > 0 ? (
               filteredSaleData.map((data) => (
-                <tr key={data.id} className="h-12">
+                <tr key={data.item_id} className="h-12">
                   <td className="px-2 md:px-4 py-2 border">
-                    <img src={data.img} alt="" className="w-12 h-12 md:w-16 md:h-16 m-auto" />
+                    <img src={data.image_path} alt="" className="w-12 h-12 md:w-16 md:h-16 m-auto" />
                   </td>
-                  <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.itemCode}</td>
+                  <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.item_code}</td>
                   <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.barcode}</td>
                   <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.name}</td>
                   <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.category}</td>
-                  <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.qty}</td>
+                  <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.quantity}</td>
                   <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.price}</td>
-                  <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.expireDate}</td>
+                  <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.expire_date ? data.expire_date.split("T")[0] : "Doesn't Expire"}</td>
                   <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.remark}</td>
                   <td className="px-2 md:px-4 py-2 border text-center">
                     <div className="flex flex-col md:flex-row gap-2 justify-center items-center">
                       <button
                         className="px-3 py-1 md:px-4 md:py-2 bg-green-500 text-white hover:bg-green-400 rounded text-xs md:text-sm"
-                        onClick={() => handleEdit(data.id)}
+                        onClick={() => handleEdit(data.item_id)}
                       >
                         <TbEdit />
                       </button>
                       <button
                         className="px-3 py-1 md:px-4 md:py-2 bg-red-500 text-white hover:bg-red-400 rounded text-xs md:text-sm"
-                        onClick={() => handleDelete(data.id)}
+                        onClick={() => handleDelete(data.item_id)}
                       >
                         <AiOutlineDelete />
                       </button>
