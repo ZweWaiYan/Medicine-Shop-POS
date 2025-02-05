@@ -68,15 +68,21 @@ async function uploaditem(item){
         await connection.commit();
 
     }catch(error){
+        console.log(error)
         await connection.rollback();
         if(error.code ==='ER_DUP_ENTRY'){
-            throw new Error ("Item code already exists.")
+            if (error.message.includes('item_code')) {
+                throw new Error("Item code already exists.");
+            } else if (error.message.includes('bar_code')) {
+                throw new Error("Barcode already exists.");
+            } else {
+                throw new Error("Duplicate entry detected.");
+            }
         }
         throw new Error(`Failed to upload item: ${error.message}`);
     }finally {
         connection.release();
     }
-
 }
 
 const uploadSchema = Joi.object({
@@ -107,6 +113,7 @@ async function upload(req, res){
     try{
         const {error} = uploadSchema.validate({item_code, barcode, name, category, price, expire_date, alert_date, quantity, remark, image_path})
         if(error){
+            console.log(error)
             if(req.file){
                 await fs.unlink(`./${image_path}`);
             }
@@ -130,12 +137,14 @@ async function upload(req, res){
             await uploaditem(item);
             res.status(201).json({ message: 'Uploaded successfully.', imagePath:image_path });
         } catch (error) {
+            console.log(error)
             if(req.file){
                 await fs.unlink(`./${image_path}`);
             }
             return res.status(400).json({ message: `Failed to upload item: ${error.message}` });
         }
     } catch (error) {
+        console.log(error)
         console.error('Unexpected error:', error.message);
         return res.status(500).json({ message: "Internal server error." });
     }

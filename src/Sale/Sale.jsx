@@ -7,13 +7,8 @@ import axios from "axios";
 import DeleteModal from "./DeleteModal";
 import Modal from "./Modal";
 
-import img1 from "../assets/sale/img1.jpg";
-import img2 from "../assets/sale/img2.jpg";
-import img3 from "../assets/sale/img3.jpg";
-import img4 from "../assets/sale/img4.jpg";
-import img5 from "../assets/sale/img5.jpg";
-
 import { FaFilter } from "react-icons/fa6";
+import { FaFilterCircleXmark } from "react-icons/fa6";
 import { FaAngleDown } from "react-icons/fa6";
 import { TbEdit } from "react-icons/tb";
 import { AiOutlineDelete } from "react-icons/ai";
@@ -23,80 +18,10 @@ import FilterModal from "./FilterModal";
 
 const fetchSaleData = async () => {
   const { data } = await axios.get("/api/allitems");
-  console.log(data)
   return data;
 };
 
 const Sale = () => {
-/*
-  const [saleData, setSaleData] = useState([
-    {
-      item_id: 1,
-      image_path: img1,
-      item_code: "001",
-      barcode: "123456789",
-      name: "Sayar Ko",
-      category: "Cream",
-      quantity: 10,
-      price: 900,
-      expire_date: "2027-12-31",
-      alert_date: "2027-11-31",
-      remark: "Famous"
-    },
-    {
-      item_id: 2,
-      image_path: img2,
-      item_code: "002",
-      barcode: "1231234",
-      name: "Paracap",
-      category: "Capsule",
-      quantity: 40,
-      price: 2700,
-      expire_date: "2027-4-31",
-      alert_date: "2027-3-31",
-      remark: ""
-    },
-    {
-      item_id: 3,
-      image_path: img3,
-      item_code: "003",
-      barcode: "123523",
-      name: "Vitamin C",
-      category: "Capsule",
-      quantity: 100,
-      price: 60,
-      expire_date: "2027-8-31",
-      alert_date: "2027-7-31",
-      remark: ""
-    },
-    {
-      item_id: 4,
-      image_path: img4,
-      item_code: "004",
-      barcode: "12325434",
-      name: "Decolgen",
-      category: "Capsule",
-      quantity: 100,
-      price: 3500,
-      expire_date: "2027-8-31",
-      alert_date: "2027-7-31",
-      remark: ""
-    },
-    {
-      item_id: 5,
-      image_path: img5,
-      item_code: "005",
-      barcode: "1231512",
-      name: "Voltex",
-      category: "Cream",
-      quantity: 30,
-      price: 2000,
-      expire_date: "2027-8-31",
-      alert_date: "2027-7-31",
-      remark: ""
-    }
-
-  ]);*/
 
   const { data: saleData, isLoading, error } = useQuery({
     queryKey: ["saleData"],
@@ -112,12 +37,19 @@ const Sale = () => {
 
   const [searchText, setSearchText] = useState("");
   const [filterSearchText, setFilterSearchText] = useState("item_code");
+  const [filteredDate, setFilteredDate] = useState({
+    selectedExpireDate: null,
+    selectedPrice: null,
+    selectedQty: null,
+    selectedExpired: null,
+    selectedAlerted: null,
+    selectedCategory: null
+  });
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
 
   const handleCreate = () => {
-    console.log(filterSearchText);
     setCurrentItem(null);
     setShowModal(true);
   };
@@ -142,21 +74,49 @@ const Sale = () => {
     console.log("do delete")
   };
 
+  const resetFilter = () => {
+    setFilteredDate({
+      selectedExpireDate: null,
+      selectedPrice: null,
+      selectedQty: null,
+      selectedExpired: null,
+      selectedAlerted: null,
+      selectedCategory: null
+    });
+  }
+
   // Filtered data based on search 
   const filteredSaleData = saleData.filter((item) => {
-    switch (filterSearchText) {
-      case "Item Code":
-        return item.item_code && item.item_code.toLowerCase().includes(searchText.toLowerCase()); 
-      case "Barcode":
-        return item.barcode && item.barcode.toLowerCase().includes(searchText.toLowerCase()); 
-      case "Name":
-        return item.name && item.name.toLowerCase().includes(searchText.toLowerCase());    
-      default:
-        return item.item_code && item.item_code.toLowerCase().includes(searchText.toLowerCase()); 
-        break;
-    }        
+
+    const matchesSearchText = (() => {
+      switch (filterSearchText) {
+        case "ItemCode":
+          return item.item_code && item.item_code.toLowerCase().includes(searchText.toLowerCase());
+        case "Barcode":
+          return item.barcode && item.barcode.toLowerCase().includes(searchText.toLowerCase());
+        case "Name":
+          return item.name && item.name.toLowerCase().includes(searchText.toLowerCase());
+        case "Remark":
+          return item.remark && item.remark.toLowerCase().includes(searchText.toLowerCase());
+        default:
+          return item.item_code && item.item_code.toLowerCase().includes(searchText.toLowerCase());
+      }
+    })();
+
+    const matchesFilters =
+      (!filteredDate.selectedExpireDate || new Date(item.expire_date).toISOString().split("T")[0] === filteredDate.selectedExpireDate) &&
+      (!filteredDate.selectedExpired || Boolean(item.is_expired) === filteredDate.selectedExpired) &&
+      // (!filteredDate.selectedAlerted || Boolean(item.alert_date) === filteredDate.selectedAlerted) &&
+      (!filteredDate.selectedCategory || item.category.toLowerCase() === filteredDate.selectedCategory.toLowerCase());
+
+    return matchesSearchText && matchesFilters;
+  }).sort((a, b) => {
+    return Number(filteredDate.selectedQty) === 1 ? b.quantity - a.quantity : a.quantity - b.quantity;
   });
 
+  const handleFilterFunc = (selectedExpireDate, selectedPrice, selectedQty, selectedExpired, selectedAlerted, selectedCategory) => {
+    setFilteredDate({ selectedExpireDate, selectedPrice, selectedQty, selectedExpired, selectedAlerted, selectedCategory });
+  };
 
   return (
     <div className="p-4 w-full">
@@ -180,6 +140,7 @@ const Sale = () => {
                     <option value="item_code">item_code</option>
                     <option value="Barcode">BarCode</option>
                     <option value="Name">Name</option>
+                    <option value="Remark">Remark</option>
                   </select>
                   <FaAngleDown
                     aria-hidden="true"
@@ -190,9 +151,22 @@ const Sale = () => {
             </div>
           </div>
           <div className="flex justify-between mt-4 md:mt-0">
+            {/* {
+              !filteredDate ? (
+                <FaFilter
+                  onClick={() => { setShowFilterModal(!showFilterModal);}}
+                  className="h-6 w-6 text-gray-500 ml-4 my-4 cursor-pointer"
+                />
+              ) :
+                (
+                  <FaFilterCircleXmark
+                    onClick={() => { resetFilter(); }}
+                    className="h-6 w-6 text-gray-500 ml-4 my-4 cursor-pointer"
+                  />
+                )
+            } */}
             <FaFilter
-              onClick={() => setShowFilterModal(!showFilterModal)}
-
+              onClick={() => { setShowFilterModal(!showFilterModal); resetFilter();}}
               className="h-6 w-6 text-gray-500 ml-4 my-4 cursor-pointer"
             />
             <button
@@ -208,7 +182,7 @@ const Sale = () => {
 
       {
         showFilterModal && (
-          <FilterModal showModal={showFilterModal} closeModal={() => setShowFilterModal(false)} />
+          <FilterModal showModal={showFilterModal} closeModal={() => setShowFilterModal(false)} handleFilter={handleFilterFunc} />
         )
       }
 
@@ -226,7 +200,10 @@ const Sale = () => {
           <tbody>
             {filteredSaleData.length > 0 ? (
               filteredSaleData.map((data) => (
-                <tr key={data.item_id} className="h-12">
+                <tr key={data.item_id} className={`border-b 
+                  ${data.expire_date && new Date(data.expire_date) < new Date() ? "border-4 border-b-4 border-red-500" :
+                    data.alert_date && new Date(data.alert_date).toDateString() === new Date().toDateString() ? "border-4 border-b-4 border-yellow-500" : "border-gray-300"}`
+                }>
                   <td className="px-2 md:px-4 py-2 border">
                     <img src={data.image_path} alt="" className="w-12 h-12 md:w-16 md:h-16 m-auto" />
                   </td>
@@ -236,9 +213,14 @@ const Sale = () => {
                   <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.category}</td>
                   <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.quantity}</td>
                   <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.price}</td>
-                  <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.expire_date ? data.expire_date.split("T")[0] : "Doesn't Expire"}</td>
+                  <td
+                    className={`px-2 md:px-4 py-2 border text-center text-sm 
+                      ${data.expire_date && new Date(data.expire_date) < new Date() ? "bg-red-500 text-white" :
+                        data.alert_date && new Date(data.alert_date).toDateString() === new Date().toDateString() ? "bg-yellow-500 text-white" : ""}`
+                    }>
+                    {data.expire_date ? data.expire_date.split("T")[0] : "Doesn't Expire"}</td>
                   <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.remark}</td>
-                  <td className="px-2 md:px-4 py-2 border text-center">
+                  <td className="px-2 md:px-4 py-2 border text-center border-gray-300">
                     <div className="flex flex-col md:flex-row gap-2 justify-center items-center">
                       <button
                         className="px-3 py-1 md:px-4 md:py-2 bg-green-500 text-white hover:bg-green-400 rounded text-xs md:text-sm"

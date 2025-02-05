@@ -66,8 +66,18 @@ async function updateitem(item){
         await connection.commit();
 
     }catch(error){
+        console.log(error)
         await connection.rollback();
-        throw new Error(`Failed to upload item: ${error.message}`);
+        if(error.code ==='ER_DUP_ENTRY'){
+            if (error.message.includes('item_code')) {
+                throw new Error("Item code already exists.");
+            } else if (error.message.includes('bar_code')) {
+                throw new Error("Barcode already exists.");
+            } else {
+                throw new Error("Duplicate entry detected.");
+            }
+        }
+        throw new Error(`Failed to update item: ${error.message}`);
     }finally {
         connection.release();
     }
@@ -102,7 +112,6 @@ async function update(req, res){
     const image_path = req.file ? `/images/${req.file.filename}` : null;
     const file = req.file;
 
-    console.log(req.body)
     try{
         const {error} = updateSchema.validate({item_code, barcode, name, category, price, expire_date, alert_date, quantity, remark, image_path})
         if(error){
@@ -127,7 +136,6 @@ async function update(req, res){
             image_path: image_path
         }
 
-        console.log(item)
         if (file) {
             const [existingItem] = await db.query('SELECT image_path FROM items WHERE item_id = ?', [item_id]);
             const oldImagePath = existingItem[0].image_path;
@@ -144,13 +152,14 @@ async function update(req, res){
             await updateitem(item);
             res.status(201).json({ message: 'Uploaded successfully.'});
         } catch (error) {
+            console.log(error)
             if(req.file){
                 await fs.promises.unlink(`./${image_path}`);
             }
-            console.log(error)
             return res.status(400).json({ message: `Failed to upload item: ${error.message}` });
         }
     } catch (error) {
+        console.log(error)
         console.error('Unexpected error:', error.message);
         return res.status(500).json({ message: "Internal server error." });
     }

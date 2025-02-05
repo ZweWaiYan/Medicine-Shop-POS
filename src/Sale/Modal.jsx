@@ -29,6 +29,7 @@ const Modal = ({ showModal, closeModal, item, onSave, tableData }) => {
   useEffect(() => {
     if (item) {
       setFields({
+        image: item.image_path || '',
         item_code: item.item_code,
         barcode: item.barcode,
         name: item.name,
@@ -45,6 +46,7 @@ const Modal = ({ showModal, closeModal, item, onSave, tableData }) => {
       });
     } else {
       setFields({
+        image: "",
         item_code: "",
         barcode: "",
         name: "",
@@ -127,7 +129,12 @@ const Modal = ({ showModal, closeModal, item, onSave, tableData }) => {
       toast.success(`${item ? "Item updated" : "Item added"} successfully!`);
     },
     onError: (error) => {
-      toast.error(`An error occurred: ${error.message}`);
+      if (error.response && error.response.data) {
+        const errMsg = error.response.data.errors || error.response.data.message || 'Error occured';
+        toast.error(`${errMsg}`);
+      } else {
+        toast.error(`An error occurred: ${error.message}`);
+      }
     }
   });
 
@@ -170,27 +177,29 @@ const Modal = ({ showModal, closeModal, item, onSave, tableData }) => {
     setFields(
       item
         ? {
-            item_code: item.item_code,
-            barcode: item.barcode,
-            name: item.name,
-            category: item.category,
-            quantity: item.quantity,
-            price: item.price,
-            expire_date: item.expire_date,
-            alert_date: item.alert_date,
-            remark: item.remark || ""
-          }
+          image: item.image_path,
+          item_code: item.item_code,
+          barcode: item.barcode,
+          name: item.name,
+          category: item.category,
+          quantity: item.quantity,
+          price: item.price,
+          expire_date: item.expire_date,
+          alert_date: item.alert_date,
+          remark: item.remark || ""
+        }
         : {
-            item_code: "",
-            barcode: "",
-            name: "",
-            category: "",
-            quantity: 0,
-            price: 0,
-            expire_date: "",
-            alert_date: "",
-            remark: ""
-          }
+          image: "",
+          item_code: "",
+          barcode: "",
+          name: "",
+          category: "",
+          quantity: 0,
+          price: 0,
+          expire_date: "",
+          alert_date: "",
+          remark: ""
+        }
     );
     setErrors({});
   };
@@ -241,11 +250,19 @@ const Modal = ({ showModal, closeModal, item, onSave, tableData }) => {
                             />
                             {fields.image && (
                               <div className="mt-2">
-                                <img
-                                  src={URL.createObjectURL(fields.image)}
-                                  alt="Preview"
-                                  className="w-32 h-32 object-cover border rounded"
-                                />
+                                {fields.image instanceof File ? (
+                                  <img
+                                    src={URL.createObjectURL(fields.image)}
+                                    alt="Preview"
+                                    className="w-32 h-32 object-cover border rounded"
+                                  />
+                                ) : (
+                                  <img
+                                    src={fields.image}
+                                    alt="Existing"
+                                    className="w-32 h-32 object-cover border rounded"
+                                  />
+                                )}
                               </div>
                             )}
                           </div>
@@ -258,9 +275,8 @@ const Modal = ({ showModal, closeModal, item, onSave, tableData }) => {
                               onChange={(e) =>
                                 handleChange(field, e.target.value)
                               }
-                              className={`w-full p-2 border rounded-sm ${
-                                isAddCategory ? "text-gray-300" : ""
-                              } ${errors[field] ? "border-red-500" : ""}`}
+                              className={`w-full p-2 border rounded-sm ${isAddCategory ? "text-gray-300" : ""
+                                } ${errors[field] ? "border-red-500" : ""}`}
                               disabled={isAddCategory}
                             >
                               <option value="">Select a category</option>
@@ -333,9 +349,8 @@ const Modal = ({ showModal, closeModal, item, onSave, tableData }) => {
                             onChange={(e) =>
                               handleChange(field, e.target.value)
                             }
-                            className={`w-full p-2 border rounded-sm ${
-                              errors[field] ? "border-red-500" : ""
-                            }`}
+                            className={`w-full p-2 border rounded-sm ${errors[field] ? "border-red-500" : ""
+                              }`}
                             placeholder={
                               field.charAt(0).toUpperCase() + field.slice(1)
                             }
@@ -349,7 +364,7 @@ const Modal = ({ showModal, closeModal, item, onSave, tableData }) => {
                 </div>
               ))}
             </div>
-  
+
             <div className="mt-4 flex justify-between">
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -374,5 +389,5 @@ const Modal = ({ showModal, closeModal, item, onSave, tableData }) => {
     </AnimatePresence>
   );
 };
-  
+
 export default Modal;
