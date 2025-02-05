@@ -96,7 +96,7 @@ const FilterModal = ({ showModal, closeModal, handleFilter }) => {
                             </select>
                         </div>
 
-                        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-7 mb-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-7 mb-3">
                             <div>
                                 <label className="inline-flex items-center cursor-pointer">
                                     <input
@@ -130,9 +130,9 @@ const FilterModal = ({ showModal, closeModal, handleFilter }) => {
                                     <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-800">Alerted?</span>
                                 </label>
                             </div>
-                        </div> */}
+                            </div>
 
-                        <div>
+                       {/* <div>
                             <label className="inline-flex items-center cursor-pointer mt-7 mb-3">
                                 <input
                                     type="checkbox"
@@ -147,7 +147,7 @@ const FilterModal = ({ showModal, closeModal, handleFilter }) => {
                                 ></div>
                                 <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-800">Expired?</span>
                             </label>
-                        </div>
+                        </div>*/}
 
 
                         <div className="text-sm font-semibold mt-5">Category</div>

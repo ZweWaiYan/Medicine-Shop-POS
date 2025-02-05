@@ -18,7 +18,6 @@ CREATE TABLE `items` (
     `category` VARCHAR(100) NOT NULL,
     `price` DECIMAL(10,2) NOT NULL,
     `image_path` VARCHAR(500),
-    `is_expired` BOOLEAN NOT NULL DEFAULT FALSE,
     `expire_date` DATE NULL,
     `alert_date` DATE NULL,
     `upload_date` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

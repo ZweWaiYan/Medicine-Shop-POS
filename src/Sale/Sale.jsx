@@ -106,7 +106,7 @@ const Sale = () => {
     const matchesFilters =
       (!filteredDate.selectedExpireDate || new Date(item.expire_date).toISOString().split("T")[0] === filteredDate.selectedExpireDate) &&
       (!filteredDate.selectedExpired || Boolean(item.is_expired) === filteredDate.selectedExpired) &&
-      // (!filteredDate.selectedAlerted || Boolean(item.alert_date) === filteredDate.selectedAlerted) &&
+      (!filteredDate.selectedAlerted || Boolean(item.is_alerted) === filteredDate.selectedAlerted) &&
       (!filteredDate.selectedCategory || item.category.toLowerCase() === filteredDate.selectedCategory.toLowerCase());
 
     return matchesSearchText && matchesFilters;
@@ -201,8 +201,8 @@ const Sale = () => {
             {filteredSaleData.length > 0 ? (
               filteredSaleData.map((data) => (
                 <tr key={data.item_id} className={`border-b 
-                  ${data.expire_date && new Date(data.expire_date) < new Date() ? "border-4 border-b-4 border-red-500" :
-                    data.alert_date && new Date(data.alert_date).toDateString() === new Date().toDateString() ? "border-4 border-b-4 border-yellow-500" : "border-gray-300"}`
+                  ${data.expire_date && data.is_expired ? "border-4 border-b-4 border-red-500" :
+                    data.alert_date && data.is_alerted ? "border-4 border-b-4 border-yellow-500" : "border-gray-300"}`
                 }>
                   <td className="px-2 md:px-4 py-2 border">
                     <img src={data.image_path} alt="" className="w-12 h-12 md:w-16 md:h-16 m-auto" />
@@ -215,8 +215,8 @@ const Sale = () => {
                   <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.price}</td>
                   <td
                     className={`px-2 md:px-4 py-2 border text-center text-sm 
-                      ${data.expire_date && new Date(data.expire_date) < new Date() ? "bg-red-500 text-white" :
-                        data.alert_date && new Date(data.alert_date).toDateString() === new Date().toDateString() ? "bg-yellow-500 text-white" : ""}`
+                      ${data.expire_date && data.is_expired ? "bg-red-500 text-white" :
+                        data.alert_date && data.is_alerted ? "bg-yellow-500 text-white" : ""}`
                     }>
                     {data.expire_date ? data.expire_date.split("T")[0] : "Doesn't Expire"}</td>
                   <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.remark}</td>

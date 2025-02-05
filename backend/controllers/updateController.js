@@ -61,6 +61,7 @@ async function updateitem(item){
         values.push(item.item_id);
         
         const query = `UPDATE items SET ${updates.join(", ")} WHERE item_id = ?`;
+        console.log(query,values)
 
         await db.query(query,values)
         await connection.commit();
