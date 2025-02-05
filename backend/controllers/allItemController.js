@@ -7,7 +7,7 @@ async function allItems(req, res){
                 DATE_FORMAT(expire_date, '%Y-%m-%d') AS expire_date, 
                 DATE_FORMAT(alert_date, '%Y-%m-%d') AS alert_date,
                 CASE WHEN expire_date <= CURDATE() THEN 1 ELSE 0 END AS is_expired,
-                CASE WHEN CURDATE() >= COALESCE(alert_date, '9999-12-31') AND alert_date < expire_date THEN 1 ELSE 0 END AS is_alerted
+                CASE WHEN CURDATE() >= COALESCE(alert_date, '9999-12-31') AND current_date < expire_date THEN 1 ELSE 0 END AS is_alerted
             FROM items;
     `;
     try{
