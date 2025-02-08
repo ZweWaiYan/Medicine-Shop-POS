@@ -15,6 +15,8 @@ import { FaMinus } from "react-icons/fa6";
 import { FiShoppingCart } from "react-icons/fi";
 import { FaCheck } from "react-icons/fa6";
 
+import PurchaseModal from "./PurchaseModal";
+
 const Bill = () => {
 
     const [saleData, setSaleData] = useState([
@@ -56,7 +58,7 @@ const Bill = () => {
             expire_date: "2027-8-31",
             alert_date: "2027-7-31",
             remark: ""
-        },      
+        },
         {
             item_id: 4,
             image_path: img4,
@@ -85,15 +87,36 @@ const Bill = () => {
         }
     ]);
 
-    const searchInputRef = useRef(null); 
+    const searchInputRef = useRef(null);
     const doneButtonRef = useRef(null);
 
-    const handleCheckout = (e) => {     
+    const [filterSearchText, setFilterSearchText] = useState("item_code");
+    const [searchText, setSearchText] = useState("");
+    const [foundedQty, setFoundedQty] = useState(0);
+    const [foundedItem, setFoundedItem] = useState("");
+
+    const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+
+    const handleCheckout = (e) => {
         e.preventDefault();
-        if (e.key === "Enter" || e.type === "click") {              
+        if (e.key === "Enter" || e.type === "click") {
             searchInputRef.current?.focus();
-        } else if (e.key === "Tab") {                      
+            setSearchText("");   
+            setFoundedQty(0);         
+        } else if (e.key === "Tab") {
             doneButtonRef.current?.focus();
+        }
+    }
+
+    const handleSearchInput = (e) => {
+        if (e.key === "Tab") {
+            setFoundedItem("");            
+        }
+    }    
+
+    const handleDone = (e) => {        
+        if (e.key === "Enter" || e.type === "click") {
+            searchInputRef.current?.focus();
         }
     }
 
@@ -102,28 +125,44 @@ const Bill = () => {
             <div className="flex flex-col md:flex-row justify-between pb-7">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
                     <div className="col-span-2">
-                        <div className="flex items-center rounded-md bg-white pl-3 outline -outline-offset-1 outline-gray-300 has-[*:focus-within]:outline-2 has-[*:focus-within]:-outline-offset-2 has-[*:focus-within]:outline-indigo-600">
-                            <div className="grid shrink-0 grid-cols-1 focus-within:relative">
-                                <select
-                                    // value={filterSearchText}
-                                    // onChange={(e) => { setFilterSearchText(e.target.value) }}
-                                    className="col-start-1 row-start-1 w-full border-r-2 border-gray-300 appearance-none py-1.5 pr-7 pl-3 mr-3 text-base text-gray-500 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
-                                >
-                                    <option value="Barcode">BarCode</option>
-                                    <option value="item_code">item_code</option>
-                                </select>
-                                <FaAngleDown
-                                    aria-hidden="true"
-                                    className="pointer-events-none col-start-1 row-start-1 mr-3 size-5 self-center justify-self-end text-gray-500 sm:size-4"
+                        <div className="relative">
+                            <div className="flex  items-center rounded-md bg-white pl-3 outline -outline-offset-1 outline-gray-300 has-[*:focus-within]:outline-2 has-[*:focus-within]:-outline-offset-2 has-[*:focus-within]:outline-indigo-600">
+                                <div className="grid shrink-0 grid-cols-1 focus-within:relative">
+                                    <select
+                                        value={filterSearchText}
+                                        onChange={(e) => { setFilterSearchText(e.target.value) }}
+                                        className="col-start-1 row-start-1 w-full border-r-2 border-gray-300 appearance-none py-1.5 pr-7 text-base text-gray-500 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
+                                    >
+                                        <option value="Barcode">BarCode</option>
+                                        <option value="item_code">item_code</option>
+                                    </select>
+                                    <FaAngleDown
+                                        aria-hidden="true"
+                                        className="pointer-events-none col-start-1 row-start-1 pl-2 mr-3 size-5 self-center justify-self-end text-gray-500 sm:size-4"
+                                    />
+                                </div>
+                                <input
+                                    type="text"
+                                    placeholder="Search....."
+                                    ref={searchInputRef}
+                                    value={searchText}
+                                    onClick={handleSearchInput}
+                                    onKeyDown={handleSearchInput}
+                                    onChange={(e) => { setSearchText(e.target.value); setFoundedItem(saleData.find(item => item[filterSearchText] === e.target.value)) }}
+                                    className="block min-w-0 grow h-[50px] py-1.5 pr-3 pl-3 text-base  text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                                 />
                             </div>
-                            <input
-                                type="text"
-                                placeholder="Search....."
-                                ref={searchInputRef}
-                                // onChange={(e) => { setSearchText(e.target.value); }}
-                                className="block min-w-0 grow h-[50px] py-1.5 pr-3 pl-3 text-base  text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
-                            />
+                            {foundedItem && (
+                                <div className="absolute left-28 w-[110px] m-2 text-xs flex items-center justify-center bg-white p-2 shadow-xl border border-gray-300 rounded-md">
+                                    <div className="flex-col sm:flex md:flex items-center justify-center">
+                                        <img src={foundedItem.image_path} alt="" className="w-[50px] h-[50px]" />
+                                        <div>
+                                            <p className="mb-1">{foundedItem.name}</p>
+                                            <p>{foundedItem.price}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                     <div className="flex justify-between">
@@ -132,14 +171,15 @@ const Bill = () => {
                                 <input
                                     type="text"
                                     placeholder="Enter Qty"
-                                    // onChange={(e) => { setSearchText(e.target.value); }}
+                                    value={foundedQty}
+                                    onChange={(e) => { setFoundedQty(e.target.value); }}
                                     className="block min-w-0 grow h-[50px] py-1.5 pr-3 pl-1 text-base  text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                                 />
                             </div>
                         </div>
                         <div className="flex justify-between max-w-[150px] md:mt-0">
                             <div>
-                                <button                                    
+                                <button
                                     onClick={handleCheckout}
                                     onKeyDown={handleCheckout}
                                     className="flex justify-around px-4 py-4  bg-blue-500 text-white rounded hover:bg-blue-400 text-sm"
@@ -204,6 +244,7 @@ const Bill = () => {
                 <div>
                     <button
                         ref={doneButtonRef}
+                        onClick={() => setShowPurchaseModal(true)}
                         className="flex justify-around px-4 py-3 mt-1 bg-green-500 text-white rounded hover:bg-green-400 text-sm"
                     >
                         <FaCheck className="m-auto" />
@@ -211,6 +252,12 @@ const Bill = () => {
                     </button>
                 </div>
             </div>
+
+            {
+                showPurchaseModal && (
+                    <PurchaseModal showModal={showPurchaseModal} closeModal={() => setShowPurchaseModal(false)} handleDone={handleDone} />
+                )
+            }
 
             <ToastContainer />
         </div >
