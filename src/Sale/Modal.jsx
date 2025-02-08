@@ -5,6 +5,9 @@ import "react-toastify/dist/ReactToastify.css";
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 
+import { FaCheck } from "react-icons/fa6";
+import { RxCross1 } from "react-icons/rx";
+
 const Modal = ({ showModal, closeModal, item, onSave, tableData }) => {
   const [fields, setFields] = useState({});
   const [errors, setErrors] = useState({});
@@ -303,7 +306,7 @@ const Modal = ({ showModal, closeModal, item, onSave, tableData }) => {
                                   onClick={addCategory}
                                   className="p-2 bg-blue-500 text-white rounded"
                                 >
-                                  Add
+                                  <FaCheck />
                                 </button>
                                 <button
                                   type="button"
@@ -312,9 +315,9 @@ const Modal = ({ showModal, closeModal, item, onSave, tableData }) => {
                                     setNewCategory("");
                                     handleChange("category", "");
                                   }}
-                                  className="p-2 bg-gray-300 rounded"
+                                  className="p-2 bg-red-500 text-white rounded"
                                 >
-                                  Cancel
+                                  <RxCross1 />
                                 </button>
                               </div>
                             )}
@@ -338,6 +341,29 @@ const Modal = ({ showModal, closeModal, item, onSave, tableData }) => {
                                 handleChange(field, e.target.value)
                               }
                               type="date"
+                              className="w-full p-2 border rounded-sm"
+                            />
+                          </div>
+                        );
+                      case "remark":
+                        return (
+                          <div className="mb-4">
+                            <label htmlFor={field} className="block mb-1">
+                              {field.charAt(0).toUpperCase() + field.slice(1).replace("_", " ")}
+                            </label>
+                            <textarea
+                              id={field}
+                              value={fields[field] || ""}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" && !e.shiftKey) {
+                                  e.preventDefault(); 
+                                  handleSubmit();
+                                }
+                              }}
+                              onChange={(e) =>
+                                handleChange(field, e.target.value)
+                              }
+                              type="text"
                               className="w-full p-2 border rounded-sm"
                             />
                           </div>

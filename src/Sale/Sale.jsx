@@ -6,6 +6,7 @@ import axios from "axios";
 
 import DeleteModal from "./DeleteModal";
 import Modal from "./Modal";
+import CategoryModal from "./CategoryModal";
 
 import { FaFilter } from "react-icons/fa6";
 import { FaFilterCircleXmark } from "react-icons/fa6";
@@ -15,6 +16,7 @@ import { AiOutlineDelete } from "react-icons/ai";
 import { MdOutlineCreateNewFolder } from "react-icons/md";
 
 import FilterModal from "./FilterModal";
+import { filter } from "framer-motion/client";
 
 const fetchSaleData = async () => {
   const { data } = await axios.get("/api/allitems");
@@ -31,6 +33,7 @@ const Sale = () => {
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
 
   const [currentItem, setCurrentItem] = useState(null);
   const [deleteCurrentItem, setDeleteCurrentItem] = useState(null);
@@ -65,6 +68,10 @@ const Sale = () => {
     setDeleteCurrentItem(item);
     setShowDeleteModal(true);
   };
+
+  const handleCategory = () => {
+    setShowCategoryModal(true);
+  }
 
   const doCreate = () => {
     console.log("do save");
@@ -152,7 +159,7 @@ const Sale = () => {
           </div>
           <div className="flex justify-between mt-4 md:mt-0">
             {/* {
-              !filteredDate ? (
+               ? (
                 <FaFilter
                   onClick={() => { setShowFilterModal(!showFilterModal);}}
                   className="h-6 w-6 text-gray-500 ml-4 my-4 cursor-pointer"
@@ -166,16 +173,25 @@ const Sale = () => {
                 )
             } */}
             <FaFilter
-              onClick={() => { setShowFilterModal(!showFilterModal); resetFilter();}}
+              onClick={() => { setShowFilterModal(!showFilterModal); resetFilter(); }}
               className="h-6 w-6 text-gray-500 ml-4 my-4 cursor-pointer"
             />
-            <button
-              onClick={handleCreate}
-              className="px-4 py-2 h-[50px] bg-blue-500 text-white rounded hover:bg-blue-400 text-sm"
-            >
-              {/* <MdOutlineCreateNewFolder /> */}
-              Create
-            </button>
+            <div>
+              <button
+                onClick={handleCategory}
+                className="px-4 py-2 mr-5 h-[50px] bg-orange-500 text-white rounded hover:bg-yellow-400 text-sm"
+              >
+                {/* <MdOutlineCreateNewFolder /> */}
+                Category
+              </button>
+              <button
+                onClick={handleCreate}
+                className="px-4 py-2 h-[50px] bg-blue-500 text-white rounded hover:bg-blue-400 text-sm"
+              >
+                {/* <MdOutlineCreateNewFolder /> */}
+                Create
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -183,6 +199,12 @@ const Sale = () => {
       {
         showFilterModal && (
           <FilterModal showModal={showFilterModal} closeModal={() => setShowFilterModal(false)} handleFilter={handleFilterFunc} />
+        )
+      }
+
+      {
+        showCategoryModal && (
+          <CategoryModal showModal={showCategoryModal} closeModal={() => setShowCategoryModal(false)} />
         )
       }
 
@@ -261,7 +283,7 @@ const Sale = () => {
           />
         )
       }
-
+     
       <ToastContainer />
     </div >
 
