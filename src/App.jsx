@@ -9,11 +9,11 @@ const queryClient = new QueryClient();
 function App() {
 
   return (
-    // <QueryClientProvider client={queryClient}>
-    //       <Sale/>          
-    // </QueryClientProvider>    
+    <QueryClientProvider client={queryClient}>
+              <Bill />    
+     </QueryClientProvider>    
+    //       <Sale/>   
 
-    <Bill />
   )
 }
 

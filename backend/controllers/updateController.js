@@ -92,9 +92,9 @@ const updateSchema = Joi.object({
     category : Joi.string().pattern(/^[A-Za-z0-9\-_(),& ]+$/).min(3).max(50).allow('').allow(null).optional()
         .messages({"string.pattern.base": "Category can only contain letters, numbers, spaces, and these symbols: - _ ( ) , &"}),
     price : Joi.number().precision(2).positive().allow('').allow(null).optional(),
-    expire_date: Joi.date().required(),
-    alert_date: Joi.date().required(),
-    quantity : Joi.number().allow('').allow(null).optional(),
+    expire_date: Joi.date().allow('').allow(null).optional(),
+    alert_date: Joi.date().allow('').allow(null).optional(),
+    quantity: Joi.number().min(0).allow(null).optional(),
     remark : Joi.string().pattern(/^[a-zA-Z0-9\s.,]*$/).allow('').allow(null).optional(),
     image_path : Joi.string().pattern(/^[a-zA-Z0-9\s\-_\/\\.]*$/).min(3).max(500).optional().allow(null, 'null').optional()
 })
@@ -120,7 +120,7 @@ async function update(req, res){
                 await fs.promises.unlink(`./${image_path}`);
             }
             console.log(error)
-            return res.status(400).json({errors: error.details[0].message});
+            return res.status(400).json({message: error.details[0].message});
         }
 
         const item = {
@@ -151,7 +151,7 @@ async function update(req, res){
 
         try {
             await updateitem(item);
-            res.status(201).json({ message: 'Uploaded successfully.'});
+            res.status(201).json({ message: 'Updated successfully.'});
         } catch (error) {
             console.log(error)
             if(req.file){
@@ -166,4 +166,38 @@ async function update(req, res){
     }
 }
 
+
+//update quantity
+/*
+async function updateQuantity(req,res){
+    const { item_id } = req.params;
+    const { quantity } = req.body;
+    const connection = await db.getConnection();
+
+    const{error} = updateSchema.validate({quantity})
+    if(error){
+        return res.status(400).json({message: error.details[0].message})
+    }
+    
+    try{
+        await connection.beginTransaction();
+        const [rows] = await connection.query("SELECT quantity FROM items WHERE item_id = ?", [item_id]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: "Item not found" });
+        }
+        const currentStock = rows[0].quantity;
+        const newStock = Math.max(0, currentStock - quantity);
+        await connection.query("UPDATE items SET quantity = ? WHERE item_id = ?", [newStock, item_id]);
+        await connection.commit();
+        res.status(200).json({ message: "Inventory updated successfully" });
+    }catch(error){
+        await connection.rollback();
+        console.error("Error updating inventory:", error);
+        res.status(500).json({ message: "Failed to update inventory" });
+    } finally {
+        connection.release();
+    }
+
+}
+*/
 module.exports = {update}
