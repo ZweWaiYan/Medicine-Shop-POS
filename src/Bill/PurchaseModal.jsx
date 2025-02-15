@@ -2,7 +2,7 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
 
-const PurchaseModal = ({ showModal, closeModal, handleDone }) => {
+const PurchaseModal = ({ showModal, closeModal, handleDone, doneRef }) => {
 
     return (
         <AnimatePresence>
@@ -31,6 +31,7 @@ const PurchaseModal = ({ showModal, closeModal, handleDone }) => {
                         <p>Your item has been successfully purchased</p>
                         <div className="mt-4 flex justify-between">
                             <motion.button
+                                ref={doneRef}
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={(e) => {
