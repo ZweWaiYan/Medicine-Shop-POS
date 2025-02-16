@@ -8,7 +8,7 @@ const uploadRoute = require('./routes/uploadRoute');
 const allItemRoute = require('./routes/allItemRoute');
 const updateRoute = require('./routes/updateRoute');
 const deleteRoute = require('./routes/deleteRoute');
-const salesreportRoute = require('./routes/salesRoute')
+const salesrecordRoute = require('./routes/salesRoute')
 const app = express();
 
 
@@ -30,7 +30,7 @@ app.use('/api', uploadRoute);
 app.use('/api', allItemRoute);
 app.use('/api', updateRoute);
 app.use('/api', deleteRoute);
-app.use('/api', salesreportRoute);
+app.use('/api', salesrecordRoute);
 
 app.listen(3000, () => {
     console.log('Server running on port 3000');
