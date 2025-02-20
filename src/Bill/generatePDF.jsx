@@ -2,12 +2,13 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 
 const generatePDF = (cart,saleData) => {
-
+    
+    console.log("saleDate pdf" , saleData);
     const doc = new jsPDF();
     const currentDate = new Date().toLocaleString(); 
 
-    doc.text("Billing Receipt", 80, 10);
-    doc.text(`Date: ${currentDate}`, 150, 10);
+    doc.text("Billing Receipt", 10, 10);
+    doc.text(`Date: ${currentDate}`, 130, 10);
     doc.text(`Sale ID: ${saleData.saleId}`, 10, 20);
 
     const tableColumn = ["Name", "Price", "Quantity", "Total"];
@@ -29,7 +30,7 @@ const generatePDF = (cart,saleData) => {
         startY: 40,
     });
 
-    const finalY = (doc.autoTable.previous ? doc.autoTable.previous.finalY : 40) + 10;
+    const finalY = (doc.autoTable.previous ? doc.autoTable.previous.finalY : 40) + 30;
 
     const formatAmount = (amount) => `${parseFloat(amount).toFixed(2)} Kyats`;
     

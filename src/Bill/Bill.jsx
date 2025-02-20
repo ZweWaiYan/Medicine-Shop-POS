@@ -159,9 +159,7 @@ const Bill = () => {
             const query = e.target.value;
             const matchedItem = saleData.find(item =>
                 item[filterSearchText]?.toLowerCase() === query.toLowerCase().trim()
-            );
-
-            console.log(matchedItem)
+            );            
 
             if (matchedItem) {
                 handleCheckout(query);
@@ -227,7 +225,7 @@ const Bill = () => {
         };
 
         try {
-            await axios.post("/api/salesreport", saleData);
+            await axios.post("/api/addsale", saleData);
             toast.success("Sale recorded successfully!");
 
             console.log("isPrint" , isPrint);
