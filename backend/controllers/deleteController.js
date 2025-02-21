@@ -35,7 +35,7 @@ const { ObjectId } = require('mongodb');
 async function deleteitem(req, res) {
     try {
         const client = await connectDB();
-        const database = client.db('storeA');
+        const database = client.db('storeB');
         const itemsCollection = database.collection('items');
         //const itemsCollection = dbInstance.collection('items');
 

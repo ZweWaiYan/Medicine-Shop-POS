@@ -162,7 +162,7 @@ const fs = require('fs').promises;
 
 async function uploaditem(item) {
     const client = await connectDB();
-    const database = client.db('storeA');
+    const database = client.db('storeB');
     const collection = database.collection("items");
 
     try {

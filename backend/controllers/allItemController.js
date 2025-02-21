@@ -33,7 +33,7 @@ const { ObjectId } = require('mongodb');
 async function allItems(req, res) {
     try {
         const client = await connectDB();
-        const database = client.db('storeA');
+        const database = client.db('storeB');
         const collection = database.collection('items');
         const currentDate = new Date();
         const allitems = await collection.find({}).toArray();

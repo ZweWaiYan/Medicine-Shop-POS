@@ -210,7 +210,7 @@ const { ObjectId } = require('mongodb');
 async function update(req, res) {
     try {
         const client = await connectDB();
-        const database = client.db('storeA');
+        const database = client.db('storeB');
         const collection = database.collection('items');
 
         const { item_id } = req.params;
