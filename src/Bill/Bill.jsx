@@ -242,13 +242,13 @@ const Bill = () => {
 
 
     const handleRemove = (itemId) => {
-        setCart(cart.filter(item => item.item_id !== itemId));
+        setCart(cart.filter(item => item._id !== itemId));
     };
     /*
         const updateInventory = async () => {
             try {
                 for (const item of cart) {
-                    await axios.put(`/api/updateQuantity/${item.item_id}`, { quantity: item.quantity });
+                    await axios.put(`/api/updateQuantity/${item._id}`, { quantity: item.quantity });
                 }
                 toast.success("Purchase successful! Inventory updated.");
             } catch (error) {
@@ -339,8 +339,8 @@ const Bill = () => {
                         <tbody>
                             {saleData.length > 0 ? (
                                 cart.map((data) => (
-                                    <tr className="border-b-2" key={data.item_id}>
-                                        <td className="px-2 md:px-4 py-2  text-center text-sm">{data.item_id}</td>
+                                    <tr className="border-b-2" key={data._id}>
+                                        <td className="px-2 md:px-4 py-2  text-center text-sm">{data.item_code}</td>
                                         <td className="px-2 md:px-4 py-2  text-center text-sm">{data.name}</td>
                                         <td className="px-2 md:px-4 py-2  text-center text-sm">{data.quantity}</td>
                                         <td className="px-2 md:px-4 py-2  text-center text-sm">{data.price * data.quantity} Kyats</td>
@@ -348,7 +348,7 @@ const Bill = () => {
                                             <div className="flex flex-col md:flex-row gap-2 justify-center items-center">
                                                 <button
                                                     className="px-3 py-1 md:px-4 md:py-2 bg-red-500 text-white hover:bg-red-400 rounded text-xs md:text-sm"
-                                                    onClick={() => handleRemove(data.item_id)}
+                                                    onClick={() => handleRemove(data._id)}
                                                 >
                                                     <FaMinus />
                                                 </button>

@@ -19,7 +19,7 @@ const DeleteModal = ({ showModal, closeModal, item, onDelete }) => {
       queryClient.invalidateQueries(["items"]);
       toast.success("Item deleted successfully!");
       closeModal();
-      onDelete(item.item_id);
+      onDelete(item._id);
     },
     onError: (err) => {
       toast.error(`An error occurred: ${err.message}`);
@@ -28,8 +28,8 @@ const DeleteModal = ({ showModal, closeModal, item, onDelete }) => {
 
   // Handle delete action
   const handleDelete = async () => {
-    if (item && item.item_id) {
-      await mutateAsync(item.item_id);
+    if (item && item._id) {
+      await mutateAsync(item._id);
     }
   };
 

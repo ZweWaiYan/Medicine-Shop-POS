@@ -21,8 +21,8 @@ const DetailModal = ({ showModal, closeModal, item }) => {
     console.log("item", item);
 
     const { data: saleData, isLoading, error } = useQuery({
-        queryKey: ["saleData", item.sale_id],
-        queryFn: () => fetchBillDetailData(item.sale_id),
+        queryKey: ["saleData", item.saleId],
+        queryFn: () => fetchBillDetailData(item.saleId),
     });
 
     if (isLoading) return <p>Loading...</p>;
@@ -59,7 +59,7 @@ const DetailModal = ({ showModal, closeModal, item }) => {
                         <div className="flex justify-between pb-5">
                             <div>
                                 <p>Sale ID</p>
-                                <p>{item.sale_id}</p>
+                                <p>{item.saleId}</p>
                             </div>
 
                             <div>
@@ -85,27 +85,27 @@ const DetailModal = ({ showModal, closeModal, item }) => {
 
                         <div className="border-t-2 py-2 flex justify-between">
                             <div>Sub Total :</div>
-                            <div>{saleData.sale.subtotal} Kyats</div>
+                            <div>{saleData.subtotal} Kyats</div>
                         </div>
                         <div className="py-2 flex justify-between">
                             <div>Discount : </div>
-                            <div>{saleData.sale.discount}</div>
+                            <div>{saleData.discount}</div>
                         </div>
                         <div className="py-2 flex justify-between">
                             <div>Cash Back : </div>
-                            <div>{saleData.sale.cash_back}</div>
+                            <div>{saleData.cash_back}</div>
                         </div>  
                         <div className="py-2 flex justify-between border-t-2">
                             <div>Total : </div>
-                            <div>{saleData.sale.total} Kyats</div>
+                            <div>{saleData.total} Kyats</div>
                         </div>     
                         <div className="py-2 flex justify-between">
                             <div>Amount Paid : </div>
-                            <div>{saleData.sale.amount_paid} Kyats</div>
+                            <div>{saleData.amount_paid} Kyats</div>
                         </div>                                                
                         <div className="py-2 flex justify-between">
                             <div>Remaining Balance : </div>
-                            <div>{saleData.sale.remaining_balance} Kyats</div>
+                            <div>{saleData.remaining_balance} Kyats</div>
                         </div>                                                                                                
 
                         <div className="mt-4 flex justify-between">

@@ -1,4 +1,4 @@
-const { all } = require('axios');
+/*const { all } = require('axios');
 const db = require('../database');
 //SELECT *, CASE WHEN expire_date < CURDATE() THEN 1 ELSE 0 END AS is_expired FROM items
 async function allItems(req, res){
@@ -23,4 +23,44 @@ async function allItems(req, res){
     }
 }
 
-module.exports = {allItems};
+module.exports = {allItems};*/
+
+
+//with mongo
+const { connectDB } = require('../mongodb_connector');
+const { ObjectId } = require('mongodb');
+
+async function allItems(req, res) {
+    try {
+        const client = await connectDB();
+        const database = client.db('storeA');
+        const collection = database.collection('items');
+        const currentDate = new Date();
+        const allitems = await collection.find({}).toArray();
+
+        /*if (allitems.length === 0) {
+            return res.status(400).json({ message: "No item found." });
+        }*/
+
+        const formattedItems = allitems.map(item => {
+            const expireDate = item.expire_date ? new Date(item.expire_date) : null;
+            const alertDate = item.alert_date ? new Date(item.alert_date) : null;
+
+            return {
+                ...item,
+                expire_date: expireDate ? expireDate.toISOString().split('T')[0] : null,
+                alert_date: alertDate ? alertDate.toISOString().split('T')[0] : null,
+                is_expired: expireDate && expireDate <= currentDate ? 1 : 0,
+                is_alerted: alertDate && currentDate >= alertDate && (!expireDate || currentDate < expireDate) ? 1 : 0
+            };
+        });
+
+        res.json(formattedItems);
+        console.log(formattedItems);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({ message: 'Internal Server Error' });
+    }
+}
+
+module.exports = { allItems };

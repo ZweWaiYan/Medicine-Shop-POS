@@ -18,7 +18,6 @@ const fetchSaleData = async () => {
   const { data } = await axios.get("/api/fetchsales");
   return data;
 };
-
 const BillReport = () => {
 
   const { data: saleData, isLoading, error } = useQuery({
@@ -42,8 +41,8 @@ const BillReport = () => {
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
 
-  const handleDetail = (sale_id) => {
-    const item = saleData.find((row) => row.sale_id === sale_id);
+  const handleDetail = (saleId) => {
+    const item = saleData.find((row) => row.saleId === saleId);
     setCurrentDetail(item);
     setDetailModal(true);
   }
@@ -62,7 +61,7 @@ const BillReport = () => {
   const filteredSaleDate = saleData.filter(item => {
 
     const matchesSearchText = filterSearchText === "bill_id"
-      ? item.sale_id?.toLowerCase().includes(searchText.toLowerCase())
+      ? item.saleId?.toLowerCase().includes(searchText.toLowerCase())
       : true;
 
     const d = new Date(item.date);
@@ -161,8 +160,8 @@ const BillReport = () => {
           <tbody>
             {filteredSaleDate.length > 0 ? (
               filteredSaleDate.slice(0,10).map((data) => (
-                <tr key={data.sale_id}>
-                  <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.sale_id}</td>
+                <tr key={data.saleId}>
+                  <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.saleId}</td>
                   <td className="px-2 md:px-4 py-2 border text-center text-sm">
                     {data.date}
                   </td>
@@ -175,7 +174,7 @@ const BillReport = () => {
                     <div className="flex flex-col md:flex-row gap-2 justify-center items-center">
                       <button
                         className="px-3 py-1 md:px-4 md:py-2 bg-green-500 text-white hover:bg-green-400 rounded text-xs md:text-sm"
-                        onClick={() => handleDetail(data.sale_id)}
+                        onClick={() => handleDetail(data.saleId)}
                       >
                         <img className="w-5" src={detail} alt="" />
                       </button>

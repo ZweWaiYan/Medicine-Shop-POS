@@ -6,10 +6,10 @@ const BillDetailgeneratePDF = (saleData) => {
     console.log("saleDate", saleData);
 
     const doc = new jsPDF();
-    const currentDate = new Date(saleData.sale.date).toLocaleDateString("en-GB");
+    const currentDate = new Date().toLocaleString();
 
 
-    doc.text(`Bill ID: ${saleData.sale.sale_id}`, 10, 10);
+    doc.text(`Bill ID: ${saleData.saleId}`, 10, 10);
     doc.text(`Date: ${currentDate}`, 150, 10);
 
     const tableColumn = ["itemCode", "BarCode", "Name", "Qty", "Price", "Total"];
@@ -41,14 +41,14 @@ const BillDetailgeneratePDF = (saleData) => {
     doc.text("Summary", 10, finalY);
     doc.setFont("helvetica", "normal");
 
-    doc.text(`Subtotal: ` + formatAmount(saleData.sale.subtotal || 0), 10, finalY + 10);
-    doc.text(`Discount: ` + formatAmount(saleData.sale.discount || 0), 10, finalY + 20);
-    doc.text(`Cashback: ` + formatAmount(saleData.sale.cashBack || 0), 10, finalY + 30);
-    doc.text(`Total: ` + formatAmount(saleData.sale.total || 0), 10, finalY + 40);
-    doc.text(`Amount Paid: ` + formatAmount(saleData.sale.amountPaid || 0), 10, finalY + 50);
-    doc.text(`Remaining Balance: ` + formatAmount(saleData.sale.remainingBalance || 0), 10, finalY + 60);
+    doc.text(`Subtotal: ` + formatAmount(saleData.subtotal || 0), 10, finalY + 10);
+    doc.text(`Discount: ` + formatAmount(saleData.discount || 0), 10, finalY + 20);
+    doc.text(`Cashback: ` + formatAmount(saleData.cashBack || 0), 10, finalY + 30);
+    doc.text(`Total: ` + formatAmount(saleData.total || 0), 10, finalY + 40);
+    doc.text(`Amount Paid: ` + formatAmount(saleData.amountPaid || 0), 10, finalY + 50);
+    doc.text(`Remaining Balance: ` + formatAmount(saleData.remainingBalance || 0), 10, finalY + 60);
 
-    doc.save(`bill-receipt-${saleData.sale.sale_id}.pdf`);
+    doc.save(`bill-receipt-${saleData.saleId}.pdf`);
 }
 
 export default BillDetailgeneratePDF

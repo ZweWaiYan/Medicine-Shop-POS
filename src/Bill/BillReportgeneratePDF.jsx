@@ -31,7 +31,7 @@ const BillReportgeneratePDF = (saleData) => {
         startY: 40,
     });
 
-    doc.save(`bill-report-lists.pdf`);
+    doc.save(`bill-report-lists-${currentDate}.pdf`);
 };
 
 export default BillReportgeneratePDF;

@@ -106,7 +106,7 @@ const Modal = ({ showModal, closeModal, item, onSave, tableData }) => {
   const mutation = useMutation({
     mutationFn: async (updatedItem) => {
       const url = item
-        ? `http://localhost:3000/api/update/${item.item_id}`
+        ? `http://localhost:3000/api/update/${item._id}`
         : "http://localhost:3000/api/upload";
       const method = item ? "put" : "post";
 

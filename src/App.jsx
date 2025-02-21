@@ -12,8 +12,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
               {/* <Bill />     */}
-                   {/* <Sale/>    */}
-                   <BillReport/>
+                  { <Sale/>}
+                   {/*<BillReport/>*/}
      </QueryClientProvider>        
 
   )

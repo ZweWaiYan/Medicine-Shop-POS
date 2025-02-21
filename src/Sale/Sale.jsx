@@ -57,14 +57,14 @@ const Sale = () => {
     setShowModal(true);
   };
 
-  const handleEdit = (item_id) => {
-    const item = saleData.find((row) => row.item_id === item_id);
+  const handleEdit = (_id) => {
+    const item = saleData.find((row) => row._id === _id);
     setCurrentItem(item);
     setShowModal(true);
   };
 
-  const handleDelete = (item_id) => {
-    const item = saleData.find((row) => row.item_id === item_id);
+  const handleDelete = (_id) => {
+    const item = saleData.find((row) => row._id === _id);
     setDeleteCurrentItem(item);
     setShowDeleteModal(true);
   };
@@ -222,7 +222,7 @@ const Sale = () => {
           <tbody>
             {filteredSaleData.length > 0 ? (
               filteredSaleData.map((data) => (
-                <tr key={data.item_id} className={`border-b 
+                <tr key={data._id} className={`border-b 
                   ${data.expire_date && data.is_expired ? "border-4 border-b-4 border-red-500" :
                     data.alert_date && data.is_alerted ? "border-4 border-b-4 border-yellow-500" : "border-gray-300"}`
                 }>
@@ -246,13 +246,13 @@ const Sale = () => {
                     <div className="flex flex-col md:flex-row gap-2 justify-center items-center">
                       <button
                         className="px-3 py-1 md:px-4 md:py-2 bg-green-500 text-white hover:bg-green-400 rounded text-xs md:text-sm"
-                        onClick={() => handleEdit(data.item_id)}
+                        onClick={() => handleEdit(data._id)}
                       >
                         <TbEdit />
                       </button>
                       <button
                         className="px-3 py-1 md:px-4 md:py-2 bg-red-500 text-white hover:bg-red-400 rounded text-xs md:text-sm"
-                        onClick={() => handleDelete(data.item_id)}
+                        onClick={() => handleDelete(data._id)}
                       >
                         <AiOutlineDelete />
                       </button>
