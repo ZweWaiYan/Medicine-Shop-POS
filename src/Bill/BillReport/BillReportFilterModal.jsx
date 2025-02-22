@@ -9,12 +9,18 @@ import { motion, AnimatePresence } from "framer-motion";
 const BillReportFilterModal = ({ showModal, closeModal, handleFilter }) => {
 
     //Amount
-    const [amount, setamount] = useState([
-        { id: 1, name: "50" }, { id: 2, name: "100" }, {id: 3, name: "200"}
-    ]);
-    const [selectedAmount, setSelectedAmount] = useState(null);
-    const handleAmount = (data) => {        
-        setSelectedAmount(data);
+    // const [amount, setamount] = useState([
+    //     { id: 1, name: "50" }, { id: 2, name: "100" }, { id: 3, name: "200" }
+    // ]);
+    // const [selectedAmount, setSelectedAmount] = useState(null);
+    // const handleAmount = (data) => {
+    //     setSelectedAmount(data);
+    // }
+
+    const [selectedAmount, setSelectedAmount] = useState("");
+    const handleAmount = (e) => {
+        const numericValue = e.target.value.replace(/[^0-9]/g, "")
+        setSelectedAmount(numericValue);
     }
 
     //Single Date   
@@ -37,7 +43,7 @@ const BillReportFilterModal = ({ showModal, closeModal, handleFilter }) => {
 
     //filter func
     const handleFilters = () => {
-        handleFilter(selectedSingleDate,selectedStartDate,selectedEndDate,selectedAmount);
+        handleFilter(selectedSingleDate, selectedStartDate, selectedEndDate, selectedAmount);
         closeModal();
     }
 
@@ -81,12 +87,23 @@ const BillReportFilterModal = ({ showModal, closeModal, handleFilter }) => {
 
                         <div >
                             <div className="text-sm font-semibold mt-5">Sale Amount</div>
-                            <select onClick={(e) => handleAmount(e.target.value)} className="w-full mt-2 p-2 border rounded">
+                            {/* <select onClick={(e) => handleAmount(e.target.value)} className="w-full mt-2 p-2 border rounded">
                                 <option disabled={selectedAmount ? true : false} value="">Select a Amount</option>
                                 {amount.map(({ id, name }) => (
                                     <option key={id} value={name}>{name}</option>
                                 ))}
-                            </select>
+                            </select> */}
+                            <input
+                                id="number-input"
+                                type="number"
+                                value={selectedAmount}
+                                onChange={handleAmount}
+                                className="w-full mt-2 p-2 border rounded "
+                                min={0}
+                                max={100}
+                                step={1}
+                                placeholder="Enter a number"
+                            />
                         </div>
 
                         <div className="mt-4 flex justify-between">

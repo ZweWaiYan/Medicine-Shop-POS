@@ -38,7 +38,7 @@ const generateSaleId = () => {
 };
 
 
-const Bill = () => {
+const BillList = () => {
 
     useEffect(() => {
         printButtonRef.current?.focus();
@@ -451,4 +451,4 @@ const Bill = () => {
     )
 }
 
-export default Bill;
+export default BillList;

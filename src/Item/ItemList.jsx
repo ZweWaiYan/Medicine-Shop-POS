@@ -23,7 +23,7 @@ const fetchSaleData = async () => {
   return data;
 };
 
-const Sale = () => {
+const ItemList = () => {
 
   const { data: saleData, isLoading, error } = useQuery({
     queryKey: ["saleData"],
@@ -290,4 +290,4 @@ const Sale = () => {
   );
 };
 
-export default Sale;
+export default ItemList;

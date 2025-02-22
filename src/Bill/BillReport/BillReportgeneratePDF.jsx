@@ -13,14 +13,15 @@ const BillReportgeneratePDF = (saleData) => {
     const tableRows = [];
 
     saleData.forEach((saleData) => {
+        console.log("saleData" , saleData);
         const rowData = [
-            saleData.sale_id,
+            saleData.saleId,
             saleData.date,
             saleData.discount,
-            saleData.cash_back,
+            saleData.cashBack,
             saleData.total,
-            saleData.amount_paid,
-            saleData.remaining_balance,            
+            saleData.amountPaid,
+            saleData.remainingBalance,            
         ];
         tableRows.push(rowData);
     });

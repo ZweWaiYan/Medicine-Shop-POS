@@ -5,14 +5,13 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
 import { FaFilter } from "react-icons/fa6";
-import detail from "../assets/detail.png";
+import detail from "../../assets/detail.png";
 import { FaAngleDown } from "react-icons/fa6";
 
-import BillReportFilterModal from "../Sale/BillReportFilterModal";
+import BillReportFilterModal from "./BillReportFilterModal";
 import DetailModal from "./DetailModal";
 
-import generatePDF from "../Bill/generatePdf";
-import BillReportgeneratePDF from "../Bill/BillReportgeneratePDF";
+import BillReportgeneratePDF from "./BillReportgeneratePDF";
 
 const fetchSaleData = async () => {
   const { data } = await axios.get("/api/fetchsales");
@@ -60,21 +59,24 @@ const BillReport = () => {
 
   const filteredSaleDate = saleData.filter(item => {
 
+    console.log("item" , item);
     const matchesSearchText = filterSearchText === "bill_id"
       ? item.saleId?.toLowerCase().includes(searchText.toLowerCase())
       : true;
 
     const d = new Date(item.date);
     const formattedDate = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+    console.log("formattedDate" , formattedDate);
+    console.log("filteredDate.selectedSingleDate " , filteredDate.selectedSingleDate );
 
     const matchesFilters =
       (!filteredDate.selectedSingleDate || formattedDate === filteredDate.selectedSingleDate) &&
       (!filteredDate.selectedStartDate && !filteredDate.selectedEndDate || formattedDate >= filteredDate.selectedStartDate && formattedDate <= filteredDate.selectedEndDate) &&
-      (!filteredDate.selectedAmount || item.amount_paid <= filteredDate.selectedAmount)
+      (!filteredDate.selectedAmount || item.amountPaid <= filteredDate.selectedAmount)
 
     return matchesSearchText && matchesFilters;
   })
-    .sort((a, b) => filteredDate.selectedAmount ? a.amount_paid - b.amount_paid : a.date - b.date)
+    .sort((a, b) => filteredDate.selectedAmount ? a.amountPaid - b.amountPaid : new Date(b.date) - new Date(a.date))
     .map(({ date, ...rest }) => {
       const d = new Date(date);
       return {
@@ -166,10 +168,10 @@ const BillReport = () => {
                     {data.date}
                   </td>
                   <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.discount}</td>
-                  <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.cash_back}</td>
+                  <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.cashBack}</td>
                   <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.total}</td>
-                  <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.amount_paid}</td>
-                  <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.remaining_balance}</td>                  
+                  <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.amountPaid}</td>
+                  <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.remainingBalance}</td>                  
                   <td className="px-2 md:px-4 py-2 border text-center border-gray-300">
                     <div className="flex flex-col md:flex-row gap-2 justify-center items-center">
                       <button

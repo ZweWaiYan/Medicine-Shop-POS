@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { FaCheck } from "react-icons/fa6";
 import { RxCross1 } from "react-icons/rx";
-import BillDetailgeneratePDF from "../Bill/BillDetailgeneratePDF";
+import BillDetailgeneratePDF from "./BillDetailgeneratePDF";
 
 const fetchBillDetailData = async (id) => {
     const { data } = await axios.get(`/api/fetchsale/${id}`);
@@ -93,7 +93,7 @@ const DetailModal = ({ showModal, closeModal, item }) => {
                         </div>
                         <div className="py-2 flex justify-between">
                             <div>Cash Back : </div>
-                            <div>{saleData.cash_back}</div>
+                            <div>{saleData.cashBack}</div>
                         </div>  
                         <div className="py-2 flex justify-between border-t-2">
                             <div>Total : </div>
@@ -101,11 +101,11 @@ const DetailModal = ({ showModal, closeModal, item }) => {
                         </div>     
                         <div className="py-2 flex justify-between">
                             <div>Amount Paid : </div>
-                            <div>{saleData.amount_paid} Kyats</div>
+                            <div>{saleData.amountPaid} Kyats</div>
                         </div>                                                
                         <div className="py-2 flex justify-between">
                             <div>Remaining Balance : </div>
-                            <div>{saleData.remaining_balance} Kyats</div>
+                            <div>{saleData.remainingBalance} Kyats</div>
                         </div>                                                                                                
 
                         <div className="mt-4 flex justify-between">

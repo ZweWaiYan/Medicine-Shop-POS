@@ -1,6 +1,6 @@
 const { MongoClient } = require("mongodb");
 
-const uri = "";
+const uri = "mongodb+srv://shopB_owner:shopB_owner123@pharmacydb.809xe.mongodb.net/?retryWrites=true&w=majority&appName=storeB";
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 async function connectDB() {

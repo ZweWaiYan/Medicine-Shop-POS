@@ -10,7 +10,7 @@ const BillDetailgeneratePDF = (saleData) => {
 
 
     doc.text(`Bill ID: ${saleData.saleId}`, 10, 10);
-    doc.text(`Date: ${currentDate}`, 150, 10);
+    doc.text(`Date: ${currentDate}`, 120, 10);
 
     const tableColumn = ["itemCode", "BarCode", "Name", "Qty", "Price", "Total"];
     const tableRows = [];
