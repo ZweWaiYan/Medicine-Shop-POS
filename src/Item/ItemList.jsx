@@ -29,7 +29,7 @@ const ItemList = () => {
     queryKey: ["saleData"],
     queryFn: fetchSaleData,
   });
-
+  console.log(saleData)
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);

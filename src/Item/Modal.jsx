@@ -2,29 +2,53 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 
 import { FaCheck } from "react-icons/fa6";
 import { RxCross1 } from "react-icons/rx";
 
+const addCategory = async (name) => {
+  await axios.post("/api/addcategory", { name });
+};
+
+const fetchCategories = async () => {
+  const { data } = await axios.get("/api/fetchcategory");
+  return data;
+};
+
 const Modal = ({ showModal, closeModal, item, onSave, tableData }) => {
   const [fields, setFields] = useState({});
   const [errors, setErrors] = useState({});
-  const [categories, setCategories] = useState([
+  /*const [categories, setCategories] = useState([
     "Capsule",
     "Cream",
     "Liquid",
-  ]);
+  ]);*/
   const [newCategory, setNewCategory] = useState("");
   const [isAddCategory, setIsAddCategory] = useState(false);
 
-  const addCategory = () => {
-    if (newCategory.trim() && !categories.includes(newCategory)) {
-      setCategories([...categories, newCategory]);
-      setNewCategory("");
-      setIsAddCategory(false);
-      handleChange("category", "");
+  const { data: category, isLoading, isError, refetch } = useQuery({
+    queryKey: ["category"], 
+    queryFn: fetchCategories,
+  });
+
+  const addMutation = useMutation({
+      mutationFn: addCategory,
+      onSuccess: () => {
+          queryClient.invalidateQueries(["category"]);
+      }
+  });
+
+  const handleAddCategory = () => {
+    if (newCategory.trim()) {
+      addMutation.mutate(newCategory, {
+        onSuccess: () => {
+          setNewCategory("");
+          setIsAddCategory(false);
+          handleChange("category", "");
+        },
+      });
     }
   };
 
@@ -282,10 +306,11 @@ const Modal = ({ showModal, closeModal, item, onSave, tableData }) => {
                                 } ${errors[field] ? "border-red-500" : ""}`}
                               disabled={isAddCategory}
                             >
-                              <option value="">Select a category</option>
-                              {categories.map((cat) => (
-                                <option key={cat} value={cat}>
-                                  {cat}
+                            <option value="">Select a category</option>
+                            {Array.isArray(category) &&
+                              category.map((cat) => (
+                                <option key={cat._id} value={cat.name}>
+                                  {cat.name}
                                 </option>
                               ))}
                               <option value="Add">+ Add Category</option>
@@ -303,7 +328,7 @@ const Modal = ({ showModal, closeModal, item, onSave, tableData }) => {
                                 />
                                 <button
                                   type="button"
-                                  onClick={addCategory}
+                                  onClick={handleAddCategory}
                                   className="p-2 bg-blue-500 text-white rounded"
                                 >
                                   <FaCheck />
