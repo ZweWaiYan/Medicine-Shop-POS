@@ -243,9 +243,9 @@ const ItemList = () => {
                     {data.expire_date ? data.expire_date.split("T")[0] : "Doesn't Expire"}</td>
                   <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.remark}</td>
                   <td className="px-2 md:px-4 py-2 border text-center border-gray-300">
-                    <div className="flex flex-col md:flex-row gap-2 justify-center items-center">
+                    <div>
                       <button
-                        className="px-3 py-1 md:px-4 md:py-2 bg-green-500 text-white hover:bg-green-400 rounded text-xs md:text-sm"
+                        className="px-3 py-1 mb-2 md:px-4 md:py-2 bg-green-500 text-white hover:bg-green-400 rounded text-xs md:text-sm"
                         onClick={() => handleEdit(data._id)}
                       >
                         <TbEdit />
