@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom'
 import { LuBox, LuUser, LuMessageSquare, LuCalendar,LuSettings } from 'react-icons/lu';
 import { FaSuitcase } from 'react-icons/fa';
 import { TbUser } from 'react-icons/tb'
+import { TbReportAnalytics } from "react-icons/tb";
+import { MdOutlinePointOfSale } from "react-icons/md";
+import { FaListUl } from "react-icons/fa6";
 
 const Sidebar = () => {
 
@@ -13,9 +16,9 @@ const Sidebar = () => {
 
   const SIDERBAR_LINKS = [
     { id: 1, path: "/", name: "Dashboard", icon: LuBox },
-    { id: 2, path: "/ItemList", name: "ItemList", icon: TbUser },
-    { id: 3, path: "/BillList", name: "BillList", icon: LuMessageSquare },
-    { id: 4, path: "/BillReport", name: "BillReport", icon: LuSettings },  
+    { id: 2, path: "/itemList", name: "ItemList", icon: FaListUl },
+    { id: 3, path: "/billList", name: "BillList", icon: MdOutlinePointOfSale },
+    { id: 4, path: "/billReport", name: "BillReport", icon: TbReportAnalytics },  
    
 
   ]

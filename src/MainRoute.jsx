@@ -8,18 +8,25 @@ import ItemList from './Item/ItemList';
 import BillList from './Bill/BillList';
 import BillReport from './Bill/BillReport/BillReport';
 
+import Login from './Login/Login';
+import Register from './Login/Register';
+
 
 const MainRoute = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Dashboard />} />
+
+        <Route index element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+        {/* <Route path="/" element={<layout />}>
+          <Route index element={<dashboard />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/ItemList" element={<ItemList />} />
-          <Route path="/BillList" element={<BillList />} />
-          <Route path="/BillReport" element={<BillReport />} />
-        </Route>
+          <Route path="/itemList" element={<ItemList />} />
+          <Route path="/billList" element={<BillList />} />
+          <Route path="/billReport" element={<BillReport />} />
+        </Route> */}
       </Routes>
     </Router>
   )
