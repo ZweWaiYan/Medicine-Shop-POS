@@ -7,6 +7,7 @@ import { AiOutlineDelete } from "react-icons/ai";
 import { FaChevronDown } from "react-icons/fa";
 import { FiPlus } from "react-icons/fi";
 import { FaMinus } from "react-icons/fa6";
+import axiosInstance from "../axiosInstance";
 
 const categoryDate = ["Capsule", "Cream", "Liquid", "Capsule", "Cream", "Liquid", "Capsule", "Cream", "Liquid"];
 
@@ -15,20 +16,20 @@ import axios from "axios";
 import { useState } from "react";
 
 const fetchCategories = async () => {
-    const { data } = await axios.get("/api/fetchcategory");
+    const { data } = await axiosInstance.get("/api/fetchcategory");
     return data;
 };
 
 const addCategory = async (name) => {
-    await axios.post("/api/addcategory", { name });
+    await axiosInstance.post("/api/addcategory", { name });
 };
 
 const updateCategory = async({id, newName}) =>{
-    await axios.put(`/api/updatecategory/${id}`, {newName});
+    await axiosInstance.put(`/api/updatecategory/${id}`, {newName});
 }
 
 const deleteCategory = async(id) =>{
-    await axios.delete(`/api/deletecategory/${id}`);
+    await axiosInstance.delete(`/api/deletecategory/${id}`);
 }
 
 

@@ -56,7 +56,7 @@ async function allItems(req, res) {
         });
 
         res.json(formattedItems);
-        console.log(formattedItems);
+        //console.log(formattedItems);
     } catch (error) {
         console.log(error);
         return res.status(500).send({ message: 'Internal Server Error' });

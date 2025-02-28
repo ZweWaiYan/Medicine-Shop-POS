@@ -5,6 +5,6 @@ const handleImageUpload = require('../middleware/handleImageUpload');
 const authenticateJWT = require('../middleware/authenticateJWT');
 const authorizeRole = require('../middleware/authorizeRole');
 
-router.post('/upload', handleImageUpload,upload);
+router.post('/upload',authenticateJWT, handleImageUpload,upload);
 
 module.exports = router;

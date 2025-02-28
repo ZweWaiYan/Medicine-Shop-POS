@@ -9,9 +9,9 @@ async function connectDB() {
             await client.connect();
             console.log("✅ Connected to MongoDB");
             const databases = await client.db().admin().listDatabases();
-            console.log("📂 Databases:", databases);
+            //console.log("📂 Databases:", databases);
         }
-        //const database = client.db("storeA");
+        //const database = client.db("storeB");
         return client;
     } catch (error) {
         console.error("❌ MongoDB Connection Error:", error);

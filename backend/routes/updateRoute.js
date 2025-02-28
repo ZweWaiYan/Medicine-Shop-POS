@@ -5,6 +5,6 @@ const handleImageUpload = require('../middleware/handleImageUpload');
 const authenticateJWT = require('../middleware/authenticateJWT');
 const authorizeRole = require('../middleware/authorizeRole');
 
-router.put('/update/:item_id', handleImageUpload,update);
+router.put('/update/:item_id',authenticateJWT, handleImageUpload,update);
 
 module.exports = router;

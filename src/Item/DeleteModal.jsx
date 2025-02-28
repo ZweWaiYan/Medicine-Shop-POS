@@ -3,16 +3,17 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import axiosInstance from "../axiosInstance";
 
 const DeleteModal = ({ showModal, closeModal, item, onDelete }) => {
   const queryClient = useQueryClient();
 
   const { mutateAsync, isLoading, isError, error } = useMutation({
     mutationFn: async (itemId) => {
-      const url = `http://localhost:3000/api/deleteitem/${itemId}`;
+      const url = `/api/deleteitem/${itemId}`;
       const method = "delete";
 
-      const response = await axios({ method, url });
+      const response = await axiosInstance({ method, url });
       return response.data;
     },
     onSuccess: () => {

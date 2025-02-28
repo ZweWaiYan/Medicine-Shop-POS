@@ -1,5 +1,5 @@
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import { autoTable } from 'jspdf-autotable';
 
 const generatePDF = (cart,saleData) => {
     
@@ -24,13 +24,13 @@ const generatePDF = (cart,saleData) => {
         tableRows.push(rowData);
     });
 
-    doc.autoTable({
+    autoTable(doc,{
         head: [tableColumn],
         body: tableRows,
         startY: 40,
     });
 
-    const finalY = (doc.autoTable.previous ? doc.autoTable.previous.finalY : 40) + 30;
+    const finalY = (autoTable.previous ? autoTable.previous.finalY : 40) + 30;
 
     const formatAmount = (amount) => `${parseFloat(amount).toFixed(2)} Kyats`;
     

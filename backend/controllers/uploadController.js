@@ -175,7 +175,7 @@ async function uploaditem(item) {
         }
 
         const result = await collection.insertOne(item);
-        console.log("Inserted Item:", result.insertedId);
+        //console.log("Inserted Item:", result.insertedId);
 
     } catch (error) {
         console.error("Insert Error:", error);

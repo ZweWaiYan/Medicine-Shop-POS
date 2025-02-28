@@ -1,8 +1,10 @@
 const jwt = require('jsonwebtoken');
 const secret = process.env.JWT_SECRET;
+require('dotenv').config();
 
 const authenticateJWT = async (req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1];
+    //console.log(token)
 
     if (!token) {
         return res.status(401).json({ message: 'Unauthorized: No token provided' });

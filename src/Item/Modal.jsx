@@ -7,13 +7,14 @@ import axios from 'axios';
 
 import { FaCheck } from "react-icons/fa6";
 import { RxCross1 } from "react-icons/rx";
+import axiosInstance from "../axiosInstance";
 
 const addCategory = async (name) => {
-  await axios.post("/api/addcategory", { name });
+  await axiosInstance.post("/api/addcategory", { name });
 };
 
 const fetchCategories = async () => {
-  const { data } = await axios.get("/api/fetchcategory");
+  const { data } = await axiosInstance.get("/api/fetchcategory");
   return data;
 };
 
@@ -139,7 +140,7 @@ const Modal = ({ showModal, closeModal, item, onSave, tableData }) => {
         formData.append(key, updatedItem[key]);
       });
 
-      const response = await axios({
+      const response = await axiosInstance({
         method,
         url,
         data: formData,

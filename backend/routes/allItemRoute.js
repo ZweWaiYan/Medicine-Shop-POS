@@ -4,6 +4,6 @@ const {allItems} = require('../controllers/allItemController');
 const authenticateJWT = require('../middleware/authenticateJWT');
 const authorizeRole = require('../middleware/authorizeRole');
 
-router.get('/allitems', allItems);
+router.get('/allitems',authenticateJWT, allItems);
 
 module.exports = router;

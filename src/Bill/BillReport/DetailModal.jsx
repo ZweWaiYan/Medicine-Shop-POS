@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
+import axiosInstance from "../../axiosInstance";
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -12,7 +13,7 @@ import { RxCross1 } from "react-icons/rx";
 import BillDetailgeneratePDF from "./BillDetailgeneratePDF";
 
 const fetchBillDetailData = async (id) => {
-    const { data } = await axios.get(`/api/fetchsale/${id}`);
+    const { data } = await axiosInstance.get(`/api/fetchsale/${id}`);
     return data;
 };
 

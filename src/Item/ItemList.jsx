@@ -17,9 +17,10 @@ import { MdOutlineCreateNewFolder } from "react-icons/md";
 
 import FilterModal from "./FilterModal";
 import { filter } from "framer-motion/client";
+import axiosInstance from "../axiosInstance";
 
 const fetchSaleData = async () => {
-  const { data } = await axios.get("/api/allitems");
+  const { data } = await axiosInstance.get("/api/allitems");
   return data;
 };
 

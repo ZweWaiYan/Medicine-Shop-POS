@@ -3,7 +3,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-
+import axiosInstance from "../../axiosInstance";
 import { FaFilter } from "react-icons/fa6";
 import detail from "../../assets/detail.png";
 import { FaAngleDown } from "react-icons/fa6";
@@ -14,7 +14,7 @@ import DetailModal from "./DetailModal";
 import BillReportgeneratePDF from "./BillReportgeneratePDF";
 
 const fetchSaleData = async () => {
-  const { data } = await axios.get("/api/fetchsales");
+  const { data } = await axiosInstance.get("/api/fetchsales");
   return data;
 };
 const BillReport = () => {

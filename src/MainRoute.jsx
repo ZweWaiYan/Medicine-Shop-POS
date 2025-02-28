@@ -20,13 +20,13 @@ const MainRoute = () => {
         <Route index element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* <Route path="/" element={<layout />}>
+        { <Route path="/" element={<Layout />}>
           <Route index element={<dashboard />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/itemList" element={<ItemList />} />
           <Route path="/billList" element={<BillList />} />
           <Route path="/billReport" element={<BillReport />} />
-        </Route> */}
+        </Route>}
       </Routes>
     </Router>
   )

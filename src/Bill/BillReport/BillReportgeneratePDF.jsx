@@ -1,5 +1,5 @@
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import { autoTable } from 'jspdf-autotable';
 
 const BillReportgeneratePDF = (saleData) => {
         
@@ -26,7 +26,7 @@ const BillReportgeneratePDF = (saleData) => {
         tableRows.push(rowData);
     });
 
-    doc.autoTable({
+    autoTable(doc,{
         head: [tableColumn],
         body: tableRows,
         startY: 40,

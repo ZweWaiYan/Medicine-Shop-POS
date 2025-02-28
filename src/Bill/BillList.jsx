@@ -20,9 +20,10 @@ import { MdLocalPrintshop } from "react-icons/md";
 
 import PurchaseModal from "./PurchaseModal";
 import generatePDF from "./generatePdf";
+import axiosInstance from "../axiosInstance";
 
 const fetchSaleData = async () => {
-    const { data } = await axios.get("/api/allitems");
+    const { data } = await axiosInstance.get("/api/allitems");
     console.log(data)
     return data;
 };
@@ -164,7 +165,7 @@ const BillList = () => {
             if (matchedItem) {
                 handleCheckout(query);
             } else {
-                console.log(matchedItem)
+                //console.log(matchedItem)
                 toast.error("Item not found!");
             }
         }
@@ -225,10 +226,10 @@ const BillList = () => {
         };
 
         try {
-            await axios.post("/api/addsale", saleData);
+            await axiosInstance.post("/api/addsale", saleData);
             toast.success("Sale recorded successfully!");
 
-            console.log("isPrint" , isPrint);
+            //console.log("isPrint" , isPrint);
             isPrint === "done" ? generatePDF(cart, saleData) : "";
 
             setCart([]);
