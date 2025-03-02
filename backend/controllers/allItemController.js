@@ -29,11 +29,14 @@ module.exports = {allItems};*/
 //with mongo
 const { connectDB } = require('../mongodb_connector');
 const { ObjectId } = require('mongodb');
+require('dotenv').config();
+const db = process.env.DB;
 
 async function allItems(req, res) {
     try {
         const client = await connectDB();
-        const database = client.db('storeB');
+        console.log(db)
+        const database = client.db(db);
         const collection = database.collection('items');
         const currentDate = new Date();
         const allitems = await collection.find({}).toArray();

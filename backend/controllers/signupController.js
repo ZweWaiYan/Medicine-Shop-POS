@@ -65,6 +65,8 @@ const bcrypt = require('bcryptjs');
 const Joi = require('joi');
 const owasp = require('owasp-password-strength-test');
 const xss = require('xss');
+require('dotenv').config();
+const db = process.env.DB
 
 owasp.config({
     allowPassphrases: false,
@@ -95,7 +97,7 @@ async function signup(req, res) {
 
     try {
         const client = await connectDB();
-        const database = client.db('storeB');
+        const database = client.db(db);
         const usersCollection = database.collection('users');
 
 

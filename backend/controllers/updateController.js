@@ -206,11 +206,13 @@ const xss = require('xss');
 const fs = require('fs');
 const path = require('path');
 const { ObjectId } = require('mongodb');
+require('dotenv').config();
+const db = process.env.DB
 
 async function update(req, res) {
     try {
         const client = await connectDB();
-        const database = client.db('storeB');
+        const database = client.db(db);
         const collection = database.collection('items');
 
         const { item_id } = req.params;

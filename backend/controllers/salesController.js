@@ -176,6 +176,8 @@ module.exports = {
 const { ObjectId } = require("mongodb");
 const { connectDB } = require('../mongodb_connector');
 const Joi = require("joi");
+require('dotenv').config();
+const db = process.env.DB
 
 // Validation schema
 const saleSchema = Joi.object({
@@ -204,7 +206,7 @@ const saleSchema = Joi.object({
 // Add sale
 async function addsale(req, res) {
     const client = await connectDB();
-    const database = client.db('storeB');
+    const database = client.db(db);
     const salesCollection = database.collection("sales");
 
     const { saleId, date, subtotal, discount, cashBack, total, amountPaid, remainingBalance, items } = req.body;
@@ -229,7 +231,7 @@ async function addsale(req, res) {
 // Update sale
 async function updatesale(req, res) {
     const client = await connectDB();
-    const database = client.db('storeB');
+    const database = client.db(db);
     const salesCollection = database.collection("sales");
 
     const { saleId } = req.params;
@@ -260,7 +262,7 @@ async function updatesale(req, res) {
 // Delete sale
 async function deletesale(req, res) {
     const client = await connectDB();
-    const database = client.db('storeB');
+    const database = client.db(db);
     const salesCollection = database.collection("sales");
 
     const { saleId } = req.params;
@@ -285,7 +287,7 @@ async function deletesale(req, res) {
 // Fetch sale by ID
 async function fetchsalebyId(req, res) {
     const client = await connectDB();
-    const database = client.db('storeB');
+    const database = client.db(db);
     const salesCollection = database.collection("sales");
 
     const { saleId } = req.params;
@@ -313,7 +315,7 @@ async function fetchsalebyId(req, res) {
 // Fetch all sales
 async function fetchsales(req, res) {
     const client = await connectDB();
-    const database = client.db('storeB');
+    const database = client.db(db);
     const salesCollection = database.collection("sales");
 
     try {

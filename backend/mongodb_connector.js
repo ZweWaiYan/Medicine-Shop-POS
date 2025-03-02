@@ -1,6 +1,7 @@
 const { MongoClient } = require("mongodb");
+require('dotenv').config();
 
-const uri = "mongodb+srv://shopB_owner:shopB_owner123@pharmacydb.809xe.mongodb.net/?retryWrites=true&w=majority&appName=storeB";
+const uri = process.env.URI;
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 async function connectDB() {
@@ -8,10 +9,9 @@ async function connectDB() {
         if (!client.topology || !client.topology.isConnected()) {
             await client.connect();
             console.log("✅ Connected to MongoDB");
-            const databases = await client.db().admin().listDatabases();
+            //const databases = await client.db().admin().listDatabases();
             //console.log("📂 Databases:", databases);
         }
-        //const database = client.db("storeB");
         return client;
     } catch (error) {
         console.error("❌ MongoDB Connection Error:", error);

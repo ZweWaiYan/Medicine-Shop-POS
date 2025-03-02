@@ -1,12 +1,14 @@
 const { ObjectId } = require("mongodb");
 const { connectDB } = require('../mongodb_connector');
 const { update } = require("./updateController");
+require('dotenv').config();
+const db = process.env.DB
 
 let categoryCollection
 async function Connectdb(){
     try{
         const client = await connectDB();
-        const database = client.db('storeB');
+        const database = client.db(db);
         categoryCollection = database.collection('category')
     }catch(error){
         console.log(error);

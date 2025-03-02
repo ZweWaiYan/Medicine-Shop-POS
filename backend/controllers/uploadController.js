@@ -159,10 +159,12 @@ const { connectDB } = require('../mongodb_connector');
 const Joi = require('joi');
 const xss = require('xss');
 const fs = require('fs').promises;
+require('dotenv').config();
+const db = process.env.DB
 
 async function uploaditem(item) {
     const client = await connectDB();
-    const database = client.db('storeB');
+    const database = client.db(db);
     const collection = database.collection("items");
 
     try {

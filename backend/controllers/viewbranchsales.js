@@ -17,17 +17,15 @@ async function viewbranchsales(req, res) {
 }
 
 async function saledetails(req, res){
+    const { ObjectId } = require('mongodb');
     const store = req.params.store;
     const saleId = req.params.saleId;
+    const client = await connectDB();
     const database = client.db(store)
     const salesCollection = database.collection('sales');
 
-    if (!ObjectId.isValid(saleId)) {
-        return res.status(400).json({ message: "Invalid sale ID format" });
-    }
-
     try {
-        const sale = await salesCollection.findOne({ _id: new ObjectId(saleId) });
+        const sale = await salesCollection.findOne({ saleId: saleId });
 
         if (!sale) {
             return res.status(404).json({ message: "No sale record found!" });
@@ -38,9 +36,6 @@ async function saledetails(req, res){
         console.error(error);
         res.status(500).json({ message: "Error fetching sale record" });
     }
-
-
-
 
 }
 

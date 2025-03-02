@@ -31,11 +31,13 @@ const { connectDB } = require('../mongodb_connector');
 const fs = require('fs');
 const path = require('path');
 const { ObjectId } = require('mongodb');
+require('dotenv').config();
+const db = process.env.DB;
 
 async function deleteitem(req, res) {
     try {
         const client = await connectDB();
-        const database = client.db('storeB');
+        const database = client.db(db);
         const itemsCollection = database.collection('items');
         //const itemsCollection = dbInstance.collection('items');
 

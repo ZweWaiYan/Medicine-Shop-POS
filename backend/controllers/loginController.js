@@ -69,6 +69,7 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const SECRET_KEY = process.env.JWT_SECRET;
+const db = process.env.DB
 
 const loginSCHEMA = Joi.object({
     username:  Joi.string().pattern(/^[a-zA-Z0-9-_]*$/).min(3).max(50).required().messages({
@@ -90,7 +91,7 @@ async function login(req, res) {
 
     try {
         const client = await connectDB();
-        const database = client.db('storeB');
+        const database = client.db(db);
         const usersCollection = database.collection('users');
         const user = await usersCollection.findOne({ username });
 
