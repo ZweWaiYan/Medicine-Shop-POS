@@ -11,12 +11,6 @@ async function connectDB() {
             console.log("✅ Connected to MongoDB");
             //const databases = await client.db().admin().listDatabases();
             //console.log("📂 Databases:", databases);
-            const admindb = client.db('admin')
-            const userinfo =await admindb.command({ usersInfo: process.env.DBUSER })
-            current_user_roles = userinfo.users;
-            console.log(current_user_roles);
-            console.log(current_user_roles.some(role => role.role === 'atlasAdmin' && role.db === 'admin'))
-
         }
         return client;
     } catch (error) {

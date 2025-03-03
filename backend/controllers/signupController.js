@@ -103,9 +103,10 @@ async function signup(req, res) {
         const userinfo = await admindb.command({ usersInfo: process.env.DBUSER });
 
         const currentUserRoles = userinfo.users[0]?.roles || [];
+        //console.log(currentUserRoles[0].role);
 
         const authorized = currentUserRoles.some(role => role.role === process.env.ROLE && role.db === 'admin');
-        if(!authorized){
+        if(!authorized && currentUserRoles[0].role != 'atlasAdmin'){
             return res.status(403).json({message:"You can only create accounts on your own database."})
         }
         

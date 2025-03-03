@@ -13,6 +13,7 @@ const authenticateJWT = async (req, res, next) => {
     try {
         const decoded = jwt.verify(token, secret, { algorithms: ['HS256'] });
         req.user = decoded;
+        console.log(decoded)
         next();
 
     } catch (err) {

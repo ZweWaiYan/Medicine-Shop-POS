@@ -13,28 +13,32 @@ import DetailModal from "./DetailModal";
 
 import BillReportgeneratePDF from "./BillReportgeneratePDF";
 
-const fetchSaleData = async () => {
-  const { data } = await axiosInstance.get("/api/fetchsales");
+const fetchSaleData = async ({ queryKey }) => {
+  console.log("queryKey" , queryKey)
+  const store = queryKey[1];
+  const { data } = await axiosInstance.get(`/api/viewreport/${store}`);
   return data;
 };
-const BillReport = () => {
 
-  const { data: saleData, isLoading, error } = useQuery({
-    queryKey: ["saleData"],
-    queryFn: fetchSaleData,
-  });
+const BillReport = () => {
 
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [showDetailModal, setDetailModal] = useState(false);
   const [currentDetail, setCurrentDetail] = useState(null);
 
   const [searchText, setSearchText] = useState("");
+  const [storeData, setStoreData] = useState("storeB");
   const [filterSearchText, setFilterSearchText] = useState("bill_id");
   const [filteredDate, setFilteredDate] = useState({
     selectedSingleDate: null,
     selectedStartDate: null,
     selectedEndDate: null,
     selectedAmount: null,
+  });
+
+  const { data: saleData = [], isLoading, error } = useQuery({
+    queryKey: ["saleData", storeData],
+    queryFn: fetchSaleData,
   });
 
   if (isLoading) return <p>Loading...</p>;
@@ -59,15 +63,12 @@ const BillReport = () => {
 
   const filteredSaleDate = saleData.filter(item => {
 
-    console.log("item" , item);
     const matchesSearchText = filterSearchText === "bill_id"
       ? item.saleId?.toLowerCase().includes(searchText.toLowerCase())
       : true;
 
     const d = new Date(item.date);
     const formattedDate = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
-    console.log("formattedDate" , formattedDate);
-    console.log("filteredDate.selectedSingleDate " , filteredDate.selectedSingleDate );
 
     const matchesFilters =
       (!filteredDate.selectedSingleDate || formattedDate === filteredDate.selectedSingleDate) &&
@@ -80,13 +81,13 @@ const BillReport = () => {
     .map(({ date, ...rest }) => {
       const d = new Date(date);
       return {
-        ...rest,        
-        date : `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`
+        ...rest,
+        date: `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`
       };
     });
 
-  const handlePrint = () => {    
-    BillReportgeneratePDF(filteredSaleDate.slice(0,10));
+  const handlePrint = () => {
+    BillReportgeneratePDF(filteredSaleDate.slice(0, 10));
   }
 
 
@@ -98,10 +99,25 @@ const BillReport = () => {
   return (
     <div className="p-4 w-full">
       <div className="flex flex-col md:flex-row justify-between pb-7">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pr-3 w-full">
-          <div>
-            <div className="mt-2">
-              <div className="flex items-center rounded-md bg-white pl-3 outline -outline-offset-1 outline-gray-300 has-[*:focus-within]:outline-2 has-[*:focus-within]:-outline-offset-2 has-[*:focus-within]:outline-indigo-600">
+        <div className="grid grid-cols-1  gap-4 pr-3 w-full">
+          <p className="col-span-1 text-3xl font-bold">Store A</p>
+          <div className="flex md:flex-row flex-col w-full">
+            <div className="flex md:flex-row flex-col w-full">
+              <div className="w-full mr-3 flex items-center rounded-md bg-white pl-3 outline -outline-offset-1 outline-gray-300 has-[*:focus-within]:outline-2 has-[*:focus-within]:-outline-offset-2 has-[*:focus-within]:outline-indigo-600">
+                <select
+                  value={storeData}
+                  onChange={(e) => { setStoreData(e.target.value) }}
+                  className="col-start-1 p-3 row-start-1 w-full  border-gray-300 appearance-none py-1.5 pr-7 text-base text-gray-500 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
+                >
+                  <option value="storeA">Store A</option>
+                  <option value="storeB">Store B</option>
+                </select>
+                <FaAngleDown
+                  aria-hidden="true"
+                  className="pointer-events-none col-start-1 row-start-1 pl-2 mr-3 size-5 self-center justify-self-end text-gray-500 sm:size-4"
+                />
+              </div>
+              <div className="w-full flex mt-3 md:mt-0 items-center rounded-md bg-white pl-3 outline -outline-offset-1 outline-gray-300 has-[*:focus-within]:outline-2 has-[*:focus-within]:-outline-offset-2 has-[*:focus-within]:outline-indigo-600">
                 <input
                   type="text"
                   placeholder="Search Bill ID....."
@@ -110,27 +126,27 @@ const BillReport = () => {
                 />
               </div>
             </div>
-          </div>
-          <div className="flex justify-between mt-4 md:mt-0">
-            <FaFilter
-              onClick={() => { setShowFilterModal(!showFilterModal) }}
-              className="h-6 w-6 text-gray-500 ml-4 my-4 cursor-pointer"
-            />
-            <div>
-              <button
-                onClick={resetFilter}
-                className="px-4 py-2 mr-5 h-[50px] bg-red-500 text-white rounded hover:bg-red-400 text-sm"
-              >
-                {/* <MdOutlineCreateNewFolder /> */}
-                Clear
-              </button>
-              <button
-                onClick={handlePrint}
-                className="px-4 py-2 h-[50px] bg-orange-500 text-white rounded hover:bg-orange-400 text-sm"
-              >
-                {/* <MdOutlineCreateNewFolder /> */}
-                Print
-              </button>
+            <div className="flex justify-between mt-4 md:mt-0 w-full">
+              <FaFilter
+                onClick={() => { setShowFilterModal(!showFilterModal) }}
+                className="h-6 w-6 text-gray-500 ml-4 my-4 cursor-pointer"
+              />
+              <div>
+                <button
+                  onClick={resetFilter}
+                  className="px-4 py-2 mr-5 h-[50px] bg-red-500 text-white rounded hover:bg-red-400 text-sm"
+                >
+                  {/* <MdOutlineCreateNewFolder /> */}
+                  Clear
+                </button>
+                <button
+                  onClick={handlePrint}
+                  className="px-4 py-2 h-[50px] bg-orange-500 text-white rounded hover:bg-orange-400 text-sm"
+                >
+                  {/* <MdOutlineCreateNewFolder /> */}
+                  Print
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -152,7 +168,7 @@ const BillReport = () => {
         <table className="min-w-full border-collapse border border-gray-300">
           <thead>
             <tr>
-              {["ID", "Date", "Discount", "Cash Back", "Total", "Amount Paid", "Remain Balance","Action"].map((heading) => (
+              {["ID", "Date", "Discount", "Cash Back", "Total", "Amount Paid", "Remain Balance", "Action"].map((heading) => (
                 <th key={heading} className="px-2 md:px-4 py-2 border text-sm md:text-lg text-center bg-gray-100">
                   {heading}
                 </th>
@@ -161,7 +177,7 @@ const BillReport = () => {
           </thead>
           <tbody>
             {filteredSaleDate.length > 0 ? (
-              filteredSaleDate.slice(0,10).map((data) => (
+              filteredSaleDate.slice(0, 10).map((data) => (
                 <tr key={data.saleId}>
                   <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.saleId}</td>
                   <td className="px-2 md:px-4 py-2 border text-center text-sm">
@@ -171,7 +187,7 @@ const BillReport = () => {
                   <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.cashBack}</td>
                   <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.total}</td>
                   <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.amountPaid}</td>
-                  <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.remainingBalance}</td>                  
+                  <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.remainingBalance}</td>
                   <td className="px-2 md:px-4 py-2 border text-center border-gray-300">
                     <div className="flex flex-col md:flex-row gap-2 justify-center items-center">
                       <button
@@ -197,7 +213,6 @@ const BillReport = () => {
 
       <ToastContainer />
     </div >
-
   );
 };
 
