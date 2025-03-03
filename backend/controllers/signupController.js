@@ -65,8 +65,8 @@ const bcrypt = require('bcryptjs');
 const Joi = require('joi');
 const owasp = require('owasp-password-strength-test');
 const xss = require('xss');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
-const db = process.env.DB
 
 owasp.config({
     allowPassphrases: false,
@@ -80,7 +80,7 @@ owasp.config({
 
 const signupSCHEMA = Joi.object({
     username: Joi.string()
-        .pattern(/^[a-zA-Z0-9-_]*$/)
+        .pattern(/^[a-zA-Z0-9-_ ]*$/)
         .min(3)
         .max(50)
         .required()
@@ -97,9 +97,18 @@ async function signup(req, res) {
 
     try {
         const client = await connectDB();
-        const database = client.db(db);
-        const usersCollection = database.collection('users');
+        const usermgmtDB = client.db(process.env.usersDB);
+        const usersCollection = usermgmtDB.collection("users");
+        const admindb = client.db('admin');
+        const userinfo = await admindb.command({ usersInfo: process.env.DBUSER });
 
+        const currentUserRoles = userinfo.users[0]?.roles || [];
+
+        const authorized = currentUserRoles.some(role => role.role === process.env.ROLE && role.db === 'admin');
+        if(!authorized){
+            return res.status(403).json({message:"You can only create accounts on your own database."})
+        }
+        
 
         const existingUser = await usersCollection.findOne({ username });
         if (existingUser) {
@@ -121,9 +130,38 @@ async function signup(req, res) {
         }
 
         const hashedPassword = await bcrypt.hash(password1, 10);
-        await usersCollection.insertOne({ username, password_hash: hashedPassword });
 
-        res.status(201).json({ message: 'User created successfully.' });
+        let assignedRole = "branch_user";
+        let assignedBranch = process.env.DB;
+
+        if (!assignedBranch) {
+            return res.status(400).json({ message: "No branch available." });
+        }
+
+        const authToken = req.headers.authorization?.split(" ")[1];
+        if (authToken) {
+            try {
+                const decoded = jwt.verify(authToken, process.env.SECRET_KEY);
+                if (decoded.role === "admin") {
+                    assignedRole = "admin";
+                } else if (decoded.role === "branch_user") {
+                    if (decoded.branch !== assignedBranch) {
+                        return res.status(403).json({ message: "Access denied: Users can only register in their own branch." });
+                    }
+                }
+            } catch (error) {
+                return res.status(401).json({ message: "Invalid or expired token" });
+            }
+        }
+
+        await usersCollection.insertOne({
+            username,
+            password_hash: hashedPassword,
+            role: assignedRole,
+            branch: assignedBranch
+        });
+
+        res.status(201).json({ message: `User registered successfully on branch ${assignedBranch}` });
     } catch (error) {
         console.error("Signup Error:", error);
         res.status(500).json({ message: "Server error" });

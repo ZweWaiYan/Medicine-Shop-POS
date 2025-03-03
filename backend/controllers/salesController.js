@@ -224,6 +224,9 @@ async function addsale(req, res) {
         res.status(201).json({ message: "Sale recorded successfully", saleId: result.insertedId });
     } catch (error) {
         console.error("Error processing sale:", error);
+        if (error.code === 8000) {
+            return res.status(403).send({ message: "You dont have permission on this database." });
+        }
         res.status(500).json({ message: "Error processing sale", error });
     }
 }

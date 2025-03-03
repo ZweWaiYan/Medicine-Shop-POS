@@ -35,7 +35,7 @@ const db = process.env.DB;
 async function allItems(req, res) {
     try {
         const client = await connectDB();
-        console.log(db)
+        //console.log(db)
         const database = client.db(db);
         const collection = database.collection('items');
         const currentDate = new Date();

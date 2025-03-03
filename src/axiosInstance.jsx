@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
 
 const axiosInstance = axios.create({
   baseURL: '',
@@ -27,6 +28,11 @@ axiosInstance.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('token');
       window.location.href = '/';
+    }
+
+    if (error.response && error.response.status === 403) {
+      toast.error(error.response.data.message)
+      
     }
 
     return Promise.reject(error);

@@ -40,6 +40,9 @@ const Login = () => {
                         <button onClick={() => navigate("/register")} className="w-full h-[45px] font-semibold text-white hover:border-2 border rounded-lg">
                             Register
                         </button>
+                        <button onClick={() => navigate("/adminRegister")} className="w-full h-[45px] font-semibold text-white hover:border-2 border rounded-lg mt-4">
+                            Admin Register
+                        </button>
                     </div>
                     <div className="absolute bottom-0 right-0 w-3/4 h-3/4 bg-blue-400 rounded-tl-full" />
                 </div>

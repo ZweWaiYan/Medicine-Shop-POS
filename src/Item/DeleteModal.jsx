@@ -23,7 +23,11 @@ const DeleteModal = ({ showModal, closeModal, item, onDelete }) => {
       onDelete(item._id);
     },
     onError: (err) => {
-      toast.error(`An error occurred: ${err.message}`);
+      if (err.response && err.response.data && err.response.data.message) {
+        toast.error(err.response.data.message);
+      } else {
+        toast.error(`An error occurred: ${err.message}`);
+      }
     },
   });
 

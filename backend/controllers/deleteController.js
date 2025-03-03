@@ -64,6 +64,10 @@ async function deleteitem(req, res) {
         res.json({ message: "Item deleted successfully." });
     } catch (error) {
         console.error("❌ Error deleting item:", error);
+        console.log(error.code)
+        if (error.code === 8000) {
+            return res.status(403).send({ message: "You can't delete another user's data." });
+        }
         return res.status(500).send({ message: "Error deleting item." });
     }
 }

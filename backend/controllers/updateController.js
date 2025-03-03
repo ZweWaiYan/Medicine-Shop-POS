@@ -305,6 +305,9 @@ async function update(req, res) {
 
     } catch (error) {
         console.error(error);
+        if (error.code === 8000) {
+            return res.status(403).send({ message: "You can't update another user's data." });
+        }
         return res.status(500).json({ message: 'Internal server error.' });
     }
 }

@@ -69,17 +69,16 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const SECRET_KEY = process.env.JWT_SECRET;
-const db = process.env.DB
+const db = process.env.usersDB;
 
 const loginSCHEMA = Joi.object({
-    username:  Joi.string().pattern(/^[a-zA-Z0-9-_]*$/).min(3).max(50).required().messages({
-            'string.pattern.base': `"username" should only contain alphanumeric characters, hyphens, and underscores (no spaces)`
-        }),
+    username: Joi.string().pattern(/^[a-zA-Z0-9-_ ]*$/).min(3).max(50).required().messages({
+        'string.pattern.base': `"username" should only contain alphanumeric characters, hyphens, and underscores (no spaces)`,
+    }),
     password: Joi.string().required(),
 });
 
 async function login(req, res) {
-    //console.log(req.body)
     const username = xss(req.body.username);
     const password = xss(req.body.password);
 
@@ -104,13 +103,15 @@ async function login(req, res) {
             return res.status(400).json({ message: "Invalid credentials" });
         }
 
-        const token = jwt.sign(
-            {
-                user_id: user._id,
-            },
-            SECRET_KEY,
-            { expiresIn: '4h' }
-        );
+        const tokenPayload = {
+            user_id: user._id,
+            username: user.username,
+            role: user.role,
+            branch: user.branch,
+        };
+        console.log(tokenPayload)
+
+        const token = jwt.sign(tokenPayload, SECRET_KEY, { expiresIn: '4h' });
 
         return res.status(200).json({
             status: "Success",
@@ -124,5 +125,6 @@ async function login(req, res) {
 }
 
 module.exports = { login };
+
 
 

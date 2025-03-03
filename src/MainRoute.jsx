@@ -10,6 +10,7 @@ import BillReport from './Bill/BillReport/BillReport';
 
 import Login from './Login/Login';
 import Register from './Login/Register';
+import AdminRegister from './Login/adminRegister';
 
 
 const MainRoute = () => {
@@ -19,6 +20,7 @@ const MainRoute = () => {
 
         <Route index element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/adminregister" element={<AdminRegister/>}/>
 
         { <Route path="/" element={<Layout />}>
           <Route index element={<dashboard />} />
@@ -26,6 +28,7 @@ const MainRoute = () => {
           <Route path="/itemList" element={<ItemList />} />
           <Route path="/billList" element={<BillList />} />
           <Route path="/billReport" element={<BillReport />} />
+
         </Route>}
       </Routes>
     </Router>

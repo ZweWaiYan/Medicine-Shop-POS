@@ -11,6 +11,9 @@ async function Connectdb(){
         const database = client.db(db);
         categoryCollection = database.collection('category')
     }catch(error){
+        if (error.code === 8000) {
+            return res.status(403).send({ message: "You can't delete another user's data." });
+        }
         console.log(error);
     }
 
@@ -33,6 +36,9 @@ async function addCategory(req,res){
         }
     }catch(error){
         console.log(error)
+        if (error.code === 8000) {
+            return res.status(403).send({ message: "You can't create category on another user's database." });
+        }
         return res.status(500).json({message:"Internal server error while inserting category."})
     }
 }
@@ -62,6 +68,9 @@ async function updateCategory(req,res){
         res.status(200).json({ message: "Category updated successfully" });
     }catch(error){
         console.log(error);
+        if (error.code === 8000) {
+            return res.status(403).send({ message: "You edit another user's data." });
+        }
         res.status(500).json({message:"Error updating category."});
     }
 }

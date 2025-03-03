@@ -181,6 +181,9 @@ async function uploaditem(item) {
 
     } catch (error) {
         console.error("Insert Error:", error);
+        if(error.code === 8000){
+            throw new Error(`You can't upload on this user's page.`);
+        }
         throw new Error(`Failed to upload item: ${error.message}`);
     }
 }
@@ -240,7 +243,7 @@ async function upload(req, res) {
             res.status(201).json({ message: 'Uploaded successfully.', imagePath: image_path });
             console.log("SUCCESS!")
         } catch (error) {
-            console.log(error);
+            //console.log(error);
             if (req.file) {
                 await fs.unlink(`./${image_path}`);
             }
