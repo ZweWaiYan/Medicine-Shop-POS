@@ -131,8 +131,8 @@ async function signup(req, res) {
         }
 
         const hashedPassword = await bcrypt.hash(password1, 10);
-
-        let assignedRole = "branch_user";
+        
+        let assignedRole = process.env.ROLE;
         let assignedBranch = process.env.DB;
 
         if (!assignedBranch) {

@@ -9,6 +9,9 @@ import { FiPlus } from "react-icons/fi";
 import { FaMinus } from "react-icons/fa6";
 import axiosInstance from "../axiosInstance";
 
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 const categoryDate = ["Capsule", "Cream", "Liquid", "Capsule", "Cream", "Liquid", "Capsule", "Cream", "Liquid"];
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -68,6 +71,7 @@ const CategoryModal = ({ showModal, closeModal }) => {
         if (newCategory.trim()) {
             addMutation.mutate(newCategory);
             setNewCategory("");
+            toast.success("Categories createed successfully!!!")
         }
     };
 
@@ -166,14 +170,14 @@ const CategoryModal = ({ showModal, closeModal }) => {
                             >
                                 Cancel
                             </motion.button>
-                            <motion.button
+                            {/* <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={handleAddCategory}
                                 className="px-4 py-2 bg-blue-500 text-white rounded"
                             >
                                 Save
-                            </motion.button>
+                            </motion.button> */}
                         </div>
                     </motion.div>
                 </motion.div>

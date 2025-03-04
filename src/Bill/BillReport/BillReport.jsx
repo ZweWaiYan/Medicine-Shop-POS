@@ -82,7 +82,7 @@ const BillReport = () => {
       const d = new Date(date);
       return {
         ...rest,
-        date: `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`
+        date: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
       };
     });
 
@@ -100,7 +100,7 @@ const BillReport = () => {
     <div className="p-4 w-full">
       <div className="flex flex-col md:flex-row justify-between pb-7">
         <div className="grid grid-cols-1  gap-4 pr-3 w-full">
-          <p className="col-span-1 text-3xl font-bold">Store A</p>
+          <p className="col-span-1 text-3xl font-bold">{storeData}</p>
           <div className="flex md:flex-row flex-col w-full">
             <div className="flex md:flex-row flex-col w-full">
               <div className="w-full mr-3 flex items-center rounded-md bg-white pl-3 outline -outline-offset-1 outline-gray-300 has-[*:focus-within]:outline-2 has-[*:focus-within]:-outline-offset-2 has-[*:focus-within]:outline-indigo-600">
@@ -160,7 +160,7 @@ const BillReport = () => {
 
       {
         showDetailModal && (
-          <DetailModal showModal={showDetailModal} closeModal={() => setDetailModal(false)} item={currentDetail} />
+          <DetailModal showModal={showDetailModal} closeModal={() => setDetailModal(false)} item={currentDetail} storeData={storeData} />
         )
       }
 

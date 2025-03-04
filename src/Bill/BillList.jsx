@@ -224,6 +224,7 @@ const BillList = () => {
                 quantity: item.quantity,
             }))
         };
+        console.log("saleData" , saleData);
 
         try {
             await axiosInstance.post("/api/addsale", saleData);
@@ -270,7 +271,7 @@ const BillList = () => {
                                     <select
                                         value={filterSearchText}
                                         onChange={(e) => { setFilterSearchText(e.target.value) }}
-                                        className="col-start-1 row-start-1 w-full border-r-2 border-gray-300 appearance-none py-1.5 pr-7 text-base text-gray-500 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
+                                        className="col-start-1 p-3 row-start-1 w-full border-r-2 border-gray-300 appearance-none py-1.5 pr-7 text-base text-gray-500 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                                     >
                                         <option value="barcode">BarCode</option>
                                         <option value="item_code">item_code</option>

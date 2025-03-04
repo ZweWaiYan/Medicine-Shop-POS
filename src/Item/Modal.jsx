@@ -314,9 +314,9 @@ const Modal = ({ showModal, closeModal, item, onSave, tableData }) => {
                                   {cat.name}
                                 </option>
                               ))}
-                              <option value="Add">+ Add Category</option>
+                              {/* <option value="Add">+ Add Category</option> */}
                             </select>
-                            {isAddCategory && (
+                            {/* {isAddCategory && (
                               <div className="mt-2 flex items-center gap-2">
                                 <input
                                   type="text"
@@ -346,7 +346,7 @@ const Modal = ({ showModal, closeModal, item, onSave, tableData }) => {
                                   <RxCross1 />
                                 </button>
                               </div>
-                            )}
+                            )} */}
                           </div>
                         );
                       case "expire_date":

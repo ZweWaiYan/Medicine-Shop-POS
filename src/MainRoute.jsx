@@ -23,7 +23,7 @@ const MainRoute = () => {
         <Route path="/adminregister" element={<AdminRegister/>}/>
 
         { <Route path="/" element={<Layout />}>
-          <Route index element={<dashboard />} />
+          <Route index element={<Dashboard />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/itemList" element={<ItemList />} />
           <Route path="/billList" element={<BillList />} />

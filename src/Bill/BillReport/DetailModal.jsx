@@ -12,18 +12,16 @@ import { FaCheck } from "react-icons/fa6";
 import { RxCross1 } from "react-icons/rx";
 import BillDetailgeneratePDF from "./BillDetailgeneratePDF";
 
-const fetchBillDetailData = async (id) => {
-    const { data } = await axiosInstance.get(`/api/fetchsale/${id}`);
+const fetchBillDetailData = async (id, storeData) => {    
+    const { data } = await axiosInstance.get(`/api/viewreport/${storeData}/${id}`);    
     return data;
 };
 
-const DetailModal = ({ showModal, closeModal, item }) => {
-
-    console.log("item", item);
+const DetailModal = ({ showModal, closeModal, item, storeData }) => {
 
     const { data: saleData, isLoading, error } = useQuery({
-        queryKey: ["saleData", item.saleId],
-        queryFn: () => fetchBillDetailData(item.saleId),
+        queryKey: ["saleData", item.saleId , storeData],
+        queryFn: () => fetchBillDetailData(item.saleId,storeData),
     });
 
     if (isLoading) return <p>Loading...</p>;
@@ -46,7 +44,7 @@ const DetailModal = ({ showModal, closeModal, item }) => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                 >
-                    <motion.div
+                    <motion.div                      
                         className="bg-white p-8 rounded-lg w-[400px] shadow-lg max-h-[90vh] overflow-y-auto"
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
