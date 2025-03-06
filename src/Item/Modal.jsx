@@ -9,35 +9,37 @@ import { FaCheck } from "react-icons/fa6";
 import { RxCross1 } from "react-icons/rx";
 import axiosInstance from "../axiosInstance";
 
-const addCategory = async (name) => {
-  await axiosInstance.post("/api/addcategory", { name });
+const addCategory = async ({ name, selectedStore }) => {
+  const response = await axiosInstance.post(`/api/addcategory?store=${selectedStore}`, { name });
+  return response.data;
 };
 
-const fetchCategories = async () => {
-  const { data } = await axiosInstance.get("/api/fetchcategory");
-  return data;
+const fetchCategories = async (selectedStore) => {
+    const { data } = await axiosInstance.get(`/api/fetchcategory?store=${selectedStore}`);
+    return data;
 };
 
-const Modal = ({ showModal, closeModal, item, onSave, tableData }) => {
+const Modal = ({ showModal, closeModal, item, onSave, tableData, selectedStore }) => {
   const [fields, setFields] = useState({});
   const [errors, setErrors] = useState({});
-  /*const [categories, setCategories] = useState([
-    "Capsule",
-    "Cream",
-    "Liquid",
-  ]);*/
+ 
   const [newCategory, setNewCategory] = useState("");
   const [isAddCategory, setIsAddCategory] = useState(false);
 
   const { data: category, isLoading, isError, refetch } = useQuery({
-    queryKey: ["category"], 
-    queryFn: fetchCategories,
+    queryKey: ["category", selectedStore], 
+    queryFn: () => fetchCategories(selectedStore),
   });
 
   const addMutation = useMutation({
-      mutationFn: addCategory,
-      onSuccess: () => {
+      mutationFn: ({ name, selectedStore }) => addCategory({ name, selectedStore }), 
+      onSuccess: (data) => {
           queryClient.invalidateQueries(["category"]);
+          toast.success(data.message);
+      },
+      onError: (error) => {
+          console.error("Error updating category:", error);
+          toast.error("Failed to update category.");
       }
   });
 
@@ -131,8 +133,8 @@ const Modal = ({ showModal, closeModal, item, onSave, tableData }) => {
   const mutation = useMutation({
     mutationFn: async (updatedItem) => {
       const url = item
-        ? `http://localhost:3000/api/update/${item._id}`
-        : "http://localhost:3000/api/upload";
+        ? `/api/update/${item._id}?store=${selectedStore}`
+        : `http://localhost:3000/api/upload?store=${selectedStore}`;
       const method = item ? "put" : "post";
 
       const formData = new FormData();
@@ -178,13 +180,13 @@ const Modal = ({ showModal, closeModal, item, onSave, tableData }) => {
         expire_date: fields.expire_date,
         alert_date: fields.alert_date,
         remark: fields.remark,
+        store: selectedStore
       };
 
       if (fields.image) {
         updatedItem.image = fields.image;
       }
 
-      console.log(updatedItem);
       mutation.mutate(updatedItem);
     }
   };

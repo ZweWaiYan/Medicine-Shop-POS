@@ -19,18 +19,30 @@ import FilterModal from "./FilterModal";
 import { filter } from "framer-motion/client";
 import axiosInstance from "../axiosInstance";
 
-const fetchSaleData = async () => {
-  const { data } = await axiosInstance.get("/api/allitems");
+const fetchSaleData = async (store) => {
+  const { data } = await axiosInstance.get(`/api/allitems?store=${store}`);
   return data;
 };
 
 const ItemList = () => {
+  const [selectedStore, setSelectedStore] = useState("");
+  useEffect(() => {
+      const fetchStoreData = async () => {
+          try {
+              const response = await axiosInstance.get("/api/getbranch");
+              setSelectedStore(response.data.storeData); 
+          } catch (error) {
+              console.error("Error fetching store data:", error);
+          }
+      };
 
+      fetchStoreData();
+    }, []);
+  
   const { data: saleData, isLoading, error } = useQuery({
-    queryKey: ["saleData"],
-    queryFn: fetchSaleData,
+    queryKey: ["saleData", selectedStore],
+    queryFn: () => fetchSaleData(selectedStore),
   });
-  console.log(saleData)
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
@@ -68,6 +80,7 @@ const ItemList = () => {
     const item = saleData.find((row) => row._id === _id);
     setDeleteCurrentItem(item);
     setShowDeleteModal(true);
+    setSelectedStore(selectedStore);
   };
 
   const handleCategory = () => {
@@ -137,7 +150,7 @@ const ItemList = () => {
                   type="text"
                   placeholder="Search....."
                   onChange={(e) => { setSearchText(e.target.value); }}
-                  className="block min-w-0 grow py-1.5 pr-3 pl-1 text-base  text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
+                  className="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                 />
                 <div className="grid shrink-0 grid-cols-1 focus-within:relative">
                   <select
@@ -145,8 +158,8 @@ const ItemList = () => {
                     onChange={(e) => { setFilterSearchText(e.target.value) }}
                     className="col-start-1 row-start-1 w-full appearance-none rounded-md py-1.5 pr-7 pl-3 text-base text-gray-500 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                   >
-                    <option value="item_code">item_code</option>
-                    <option value="Barcode">BarCode</option>
+                    <option value="item_code">Item Code</option>
+                    <option value="Barcode">Barcode</option>
                     <option value="Name">Name</option>
                     <option value="Remark">Remark</option>
                   </select>
@@ -159,20 +172,20 @@ const ItemList = () => {
             </div>
           </div>
           <div className="flex justify-between mt-4 md:mt-0">
-            {/* {
-               ? (
-                <FaFilter
-                  onClick={() => { setShowFilterModal(!showFilterModal);}}
-                  className="h-6 w-6 text-gray-500 ml-4 my-4 cursor-pointer"
-                />
-              ) :
-                (
-                  <FaFilterCircleXmark
-                    onClick={() => { resetFilter(); }}
-                    className="h-6 w-6 text-gray-500 ml-4 my-4 cursor-pointer"
-                  />
-                )
-            } */}
+            {/* Store Dropdown */}
+            <div className="mr-4">
+              <label className="mr-2 text-gray-700 font-semibold">Select Store:</label>
+              <select
+                value={selectedStore}
+                onChange={(e) => setSelectedStore(e.target.value)}
+                className="p-2 border rounded"
+              >
+                <option value="storeA">Store A</option>
+                <option value="storeB">Store B</option>
+                {/* Add more store options as needed */}
+              </select>
+            </div>
+  
             <FaFilter
               onClick={() => { setShowFilterModal(!showFilterModal); resetFilter(); }}
               className="h-6 w-6 text-gray-500 ml-4 my-4 cursor-pointer"
@@ -182,33 +195,28 @@ const ItemList = () => {
                 onClick={handleCategory}
                 className="px-4 py-2 mr-5 h-[50px] bg-orange-500 text-white rounded hover:bg-yellow-400 text-sm"
               >
-                {/* <MdOutlineCreateNewFolder /> */}
                 Category
               </button>
               <button
                 onClick={handleCreate}
                 className="px-4 py-2 h-[50px] bg-blue-500 text-white rounded hover:bg-blue-400 text-sm"
               >
-                {/* <MdOutlineCreateNewFolder /> */}
                 Create
               </button>
             </div>
           </div>
         </div>
       </div>
-
-      {
-        showFilterModal && (
-          <FilterModal showModal={showFilterModal} closeModal={() => setShowFilterModal(false)} handleFilter={handleFilterFunc} />
-        )
-      }
-
-      {
-        showCategoryModal && (
-          <CategoryModal showModal={showCategoryModal} closeModal={() => setShowCategoryModal(false)} />
-        )
-      }
-
+  
+      {/* Modals */}
+      {showFilterModal && (
+        <FilterModal showModal={showFilterModal} closeModal={() => setShowFilterModal(false)} handleFilter={handleFilterFunc} />
+      )}
+      {showCategoryModal && (
+        <CategoryModal showModal={showCategoryModal} selectedStore={selectedStore} closeModal={() => setShowCategoryModal(false)} />
+      )}
+  
+      {/* Table */}
       <div className="overflow-auto">
         <table className="min-w-full border-collapse border border-gray-300">
           <thead>
@@ -225,8 +233,8 @@ const ItemList = () => {
               filteredSaleData.map((data) => (
                 <tr key={data._id} className={`border-b 
                   ${data.expire_date && data.is_expired ? "border-4 border-b-4 border-red-500" :
-                    data.alert_date && data.is_alerted ? "border-4 border-b-4 border-yellow-500" : "border-gray-300"}`
-                }>
+                  data.alert_date && data.is_alerted ? "border-4 border-b-4 border-yellow-500" : "border-gray-300"}`}
+                >
                   <td className="px-2 md:px-4 py-2 border">
                     <img src={data.image_path} alt="" className="w-12 h-12 md:w-16 md:h-16 m-auto" />
                   </td>
@@ -239,9 +247,10 @@ const ItemList = () => {
                   <td
                     className={`px-2 md:px-4 py-2 border text-center text-sm 
                       ${data.expire_date && data.is_expired ? "bg-red-500 text-white" :
-                        data.alert_date && data.is_alerted ? "bg-yellow-500 text-white" : ""}`
-                    }>
-                    {data.expire_date ? data.expire_date.split("T")[0] : "Doesn't Expire"}</td>
+                        data.alert_date && data.is_alerted ? "bg-yellow-500 text-white" : ""}`}
+                  >
+                    {data.expire_date ? data.expire_date.split("T")[0] : "Doesn't Expire"}
+                  </td>
                   <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.remark}</td>
                   <td className="px-2 md:px-4 py-2 border text-center border-gray-300">
                     <div>
@@ -271,24 +280,22 @@ const ItemList = () => {
           </tbody>
         </table>
       </div>
-
-      <Modal showModal={showModal} closeModal={() => setShowModal(false)} item={currentItem} onSave={doCreate} tableData={saleData} />
-
-      {
-        deleteCurrentItem && (
-          <DeleteModal
-            showModal={showDeleteModal}
-            closeModal={() => setShowDeleteModal(false)}
-            item={deleteCurrentItem}
-            onDelete={doDelete}
-          />
-        )
-      }
-     
+  
+      {/* Modals */}
+      <Modal showModal={showModal} closeModal={() => setShowModal(false)} item={currentItem} onSave={doCreate} tableData={saleData} selectedStore={selectedStore}  />
+      {deleteCurrentItem && (
+        <DeleteModal
+          showModal={showDeleteModal}
+          closeModal={() => setShowDeleteModal(false)}
+          item={deleteCurrentItem}
+          selectedStore={selectedStore}
+          onDelete={doDelete}
+        />
+      )}
+  
       <ToastContainer />
-    </div >
-
-  );
+    </div>
+  );  
 };
 
 export default ItemList;

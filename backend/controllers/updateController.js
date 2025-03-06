@@ -207,12 +207,14 @@ const fs = require('fs');
 const path = require('path');
 const { ObjectId } = require('mongodb');
 require('dotenv').config();
-const db = process.env.DB
+const getDBname = require('./getDBname');
 
 async function update(req, res) {
     try {
         const client = await connectDB();
-        const database = client.db(db);
+        //const database = client.db(db);
+        const database = client.db(getDBname(req));
+
         const collection = database.collection('items');
 
         const { item_id } = req.params;
@@ -264,7 +266,7 @@ async function update(req, res) {
         const { error } = updateSchema.validate({ item_code, barcode, name, category, price, expire_date, alert_date, quantity, remark, image_path });
         if (error) {
             if (req.file) {
-                await fs.promises.unlink(`./${image_path}`); // Remove uploaded file if validation fails
+                await fs.promises.unlink(`./${image_path}`);
             }
             return res.status(400).json({ message: error.details[0].message });
         }
@@ -304,7 +306,7 @@ async function update(req, res) {
         res.status(200).json({ message: 'Updated successfully.' });
 
     } catch (error) {
-        console.error(error);
+        //console.error(error);
         if (error.code === 8000) {
             return res.status(403).send({ message: "You can't update another user's data." });
         }

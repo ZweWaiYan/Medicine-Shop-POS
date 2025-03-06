@@ -2,6 +2,13 @@ const { MongoClient } = require('mongodb');
 const { connectDB } = require('../mongodb_connector');
 
 async function viewbranchsales(req, res) {
+    let branch
+    if(req.user.role === 'admin'){
+        branch = 'storeA'
+    }else{
+        branch = req.user.branch
+    }
+    console.log(branch)
     try {
         const store = req.params.store;
         const client = await connectDB();

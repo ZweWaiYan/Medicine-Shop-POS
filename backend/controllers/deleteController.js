@@ -32,13 +32,14 @@ const fs = require('fs');
 const path = require('path');
 const { ObjectId } = require('mongodb');
 require('dotenv').config();
-const db = process.env.DB;
-
+const getDbName = require('./getDBname'); 
 async function deleteitem(req, res) {
+    const client = await connectDB();
+    const dbname = getDbName(req);
+    const database = client.db(dbname);
+    const itemsCollection = database.collection('items');
     try {
-        const client = await connectDB();
-        const database = client.db(db);
-        const itemsCollection = database.collection('items');
+
         //const itemsCollection = dbInstance.collection('items');
 
         const itemId = req.params.item_id;
@@ -64,7 +65,6 @@ async function deleteitem(req, res) {
         res.json({ message: "Item deleted successfully." });
     } catch (error) {
         console.error("❌ Error deleting item:", error);
-        console.log(error.code)
         if (error.code === 8000) {
             return res.status(403).send({ message: "You can't delete another user's data." });
         }

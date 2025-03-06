@@ -14,7 +14,6 @@ import DetailModal from "./DetailModal";
 import BillReportgeneratePDF from "./BillReportgeneratePDF";
 
 const fetchSaleData = async ({ queryKey }) => {
-  console.log("queryKey" , queryKey)
   const store = queryKey[1];
   const { data } = await axiosInstance.get(`/api/viewreport/${store}`);
   return data;
@@ -27,7 +26,21 @@ const BillReport = () => {
   const [currentDetail, setCurrentDetail] = useState(null);
 
   const [searchText, setSearchText] = useState("");
-  const [storeData, setStoreData] = useState("storeB");
+  const [storeData, setStoreData] = useState("");
+
+  useEffect(() => {
+    const fetchStoreData = async () => {
+        try {
+            const response = await axiosInstance.get("/api/getbranch");
+            setStoreData(response.data.storeData); 
+        } catch (error) {
+            console.error("Error fetching store data:", error);
+        }
+    };
+
+    fetchStoreData();
+  }, []);
+  
   const [filterSearchText, setFilterSearchText] = useState("bill_id");
   const [filteredDate, setFilteredDate] = useState({
     selectedSingleDate: null,

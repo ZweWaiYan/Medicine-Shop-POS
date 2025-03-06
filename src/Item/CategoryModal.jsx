@@ -18,73 +18,91 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useState } from "react";
 
-const fetchCategories = async () => {
-    const { data } = await axiosInstance.get("/api/fetchcategory");
+const fetchCategories = async (selectedStore) => {
+    const { data } = await axiosInstance.get(`/api/fetchcategory?store=${selectedStore}`);
     return data;
 };
 
-const addCategory = async (name) => {
-    await axiosInstance.post("/api/addcategory", { name });
+const addCategory = async ({ name, selectedStore }) => {
+    const response = await axiosInstance.post(`/api/addcategory?store=${selectedStore}`, { name });
+    return response.data;
 };
 
-const updateCategory = async({id, newName}) =>{
-    await axiosInstance.put(`/api/updatecategory/${id}`, {newName});
+const updateCategory = async({id, newName, selectedStore}) =>{
+    const response = await axiosInstance.put(`/api/updatecategory/${id}/?store=${selectedStore}`, {newName});
+    return response.data;
 }
 
-const deleteCategory = async(id) =>{
-    await axiosInstance.delete(`/api/deletecategory/${id}`);
+const deleteCategory = async({id, selectedStore}) =>{
+    const response = await axiosInstance.delete(`/api/deletecategory/${id}/?store=${selectedStore}`);
+    return response.data
 }
 
 
-const CategoryModal = ({ showModal, closeModal }) => {
+const CategoryModal = ({ showModal, closeModal, selectedStore }) => {
     const queryClient = useQueryClient();
     const [newCategory, setNewCategory] = useState("");
 
     const { data: category, isLoading, isError } = useQuery({
         queryKey: ["category"], 
-        queryFn: fetchCategories
+        queryFn: () => fetchCategories(selectedStore),
     });
 
     const addMutation = useMutation({
-        mutationFn: addCategory,
-        onSuccess: () => {
+        mutationFn: ({ name, selectedStore }) => addCategory({ name, selectedStore }), 
+        onSuccess: (data) => {
             queryClient.invalidateQueries(["category"]);
+            toast.success(data.message);
+        },
+        onError: (error) => {
+            console.error("Error updating category:", error);
+            toast.error("Failed to update category.");
         }
     });
 
     const updateMutation = useMutation({
-        mutationFn: updateCategory,
-        onSuccess: () => {
+        mutationFn: ({ id, newName, selectedStore }) => updateCategory({ id, newName, selectedStore }),
+        onSuccess: (data) => {
             queryClient.invalidateQueries(["category"]);
+            toast.success(data.message);
+        },
+        onError: (error) => {
+            console.error("Error updating category:", error);
+            toast.error("Failed to update category.");
         }
     });
 
     const deleteMutation = useMutation({
-        mutationFn: deleteCategory,
-        onSuccess: () => {
+        mutationFn: ({ id, selectedStore }) => deleteCategory({ id, selectedStore }),
+        onSuccess: (data) => {
             queryClient.invalidateQueries(["category"]);
+            toast.success(data.message);
+        },
+        onError: (error) => {
+            console.error("Error deleting category:", error);
+            toast.error("Failed to delete category.");
         }
-    });
+    })
 
     const handleAddCategory = (e) => {
         e.preventDefault();
         if (newCategory.trim()) {
-            addMutation.mutate(newCategory);
+            addMutation.mutate({ name: newCategory, selectedStore });
             setNewCategory("");
-            toast.success("Categories createed successfully!!!")
+            toast.success("Categories created successfully!!!")
         }
     };
 
-    const handleUpdateCategory = (id, currentName) => {
+    const handleUpdateCategory = (id, currentName, selectedStore) => {
         const newName = prompt("Enter new name:", currentName);
         if (newName && newName !== currentName) {
-            updateMutation.mutate({ id, newName });
+            updateMutation.mutate({ id, newName, selectedStore });
         }
     };
 
-    const handleDeleteCategory = (id) => {
+    const handleDeleteCategory = (id, selectedStore) => {
         if (window.confirm("Are you sure you want to delete this category?")) {
-            deleteMutation.mutate(id);
+            deleteMutation.mutate({ id, selectedStore });
         }
     };
 
@@ -144,14 +162,14 @@ const CategoryModal = ({ showModal, closeModal }) => {
                                     />
                                     <button
                                         type="button"
-                                        onClick={() => handleUpdateCategory(category._id, category.name)}
+                                        onClick={() => handleUpdateCategory(category._id, category.name, selectedStore)}
                                         className="p-2 bg-green-500 text-white rounded"
                                     >
                                         <FiPlus />
                                     </button>
                                     <button
                                         type="button"
-                                        onClick={() => handleDeleteCategory(category._id)}
+                                        onClick={() => handleDeleteCategory(category._id, selectedStore)}
                                         className="p-2 bg-red-500 text-white rounded"
                                     >
                                         <FaMinus />

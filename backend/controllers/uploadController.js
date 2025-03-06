@@ -160,11 +160,12 @@ const Joi = require('joi');
 const xss = require('xss');
 const fs = require('fs').promises;
 require('dotenv').config();
-const db = process.env.DB
+const getDBname = require('./getDBname');
 
-async function uploaditem(item) {
+async function uploaditem(item, req) {
     const client = await connectDB();
-    const database = client.db(db);
+    const dbname = getDBname(req)
+    const database = client.db(dbname);
     const collection = database.collection("items");
 
     try {
@@ -239,11 +240,11 @@ async function upload(req, res) {
         };
 
         try {
-            await uploaditem(item);
+            await uploaditem(item, req);
             res.status(201).json({ message: 'Uploaded successfully.', imagePath: image_path });
             console.log("SUCCESS!")
         } catch (error) {
-            //console.log(error);
+            console.log(error);
             if (req.file) {
                 await fs.unlink(`./${image_path}`);
             }

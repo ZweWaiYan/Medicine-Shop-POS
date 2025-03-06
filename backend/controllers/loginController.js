@@ -109,7 +109,6 @@ async function login(req, res) {
             role: user.role,
             branch: user.branch,
         };
-        console.log(tokenPayload)
 
         const token = jwt.sign(tokenPayload, SECRET_KEY, { expiresIn: '4h' });
 

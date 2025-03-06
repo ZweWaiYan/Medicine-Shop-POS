@@ -5,12 +5,12 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import axiosInstance from "../axiosInstance";
 
-const DeleteModal = ({ showModal, closeModal, item, onDelete }) => {
+const DeleteModal = ({ showModal, closeModal, item, onDelete, selectedStore }) => {
   const queryClient = useQueryClient();
 
   const { mutateAsync, isLoading, isError, error } = useMutation({
     mutationFn: async (itemId) => {
-      const url = `/api/deleteitem/${itemId}`;
+      const url = `/api/deleteitem/${itemId}?store=${selectedStore}`;  // Use selectedStore here
       const method = "delete";
 
       const response = await axiosInstance({ method, url });
@@ -31,7 +31,6 @@ const DeleteModal = ({ showModal, closeModal, item, onDelete }) => {
     },
   });
 
-  // Handle delete action
   const handleDelete = async () => {
     if (item && item._id) {
       await mutateAsync(item._id);

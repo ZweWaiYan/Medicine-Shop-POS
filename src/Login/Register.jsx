@@ -39,7 +39,6 @@ const Register = () => {
                 navigate("/");
             }, 2000);
         } catch (err) {
-            console.log()
             setError(err.response.data.message || "Registration failed");
         }
     };
