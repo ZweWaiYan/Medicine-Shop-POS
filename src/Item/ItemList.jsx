@@ -18,6 +18,7 @@ import { MdOutlineCreateNewFolder } from "react-icons/md";
 import FilterModal from "./FilterModal";
 import { filter } from "framer-motion/client";
 import axiosInstance from "../axiosInstance";
+import { jwtDecode } from "jwt-decode";
 
 const fetchSaleData = async (store) => {
   const { data } = await axiosInstance.get(`/api/allitems?store=${store}`);
@@ -27,17 +28,16 @@ const fetchSaleData = async (store) => {
 const ItemList = () => {
   const [selectedStore, setSelectedStore] = useState("");
   useEffect(() => {
-      const fetchStoreData = async () => {
+      const token = localStorage.getItem("token");
+      if (token) {
           try {
-              const response = await axiosInstance.get("/api/getbranch");
-              setSelectedStore(response.data.storeData); 
+              const decodedToken = jwtDecode(token);
+              setSelectedStore(decodedToken.branch);
           } catch (error) {
-              console.error("Error fetching store data:", error);
+              console.error("Invalid token:", error);
           }
-      };
-
-      fetchStoreData();
-    }, []);
+      }
+  }, []);
   
   const { data: saleData, isLoading, error } = useQuery({
     queryKey: ["saleData", selectedStore],

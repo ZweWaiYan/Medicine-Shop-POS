@@ -1,18 +1,12 @@
 const { MongoClient } = require('mongodb');
 const { connectDB } = require('../mongodb_connector');
-
+const getDBname = require('./getDBname');
 async function viewbranchsales(req, res) {
-    let branch
-    if(req.user.role === 'admin'){
-        branch = 'storeA'
-    }else{
-        branch = req.user.branch
-    }
-    console.log(branch)
     try {
         const store = req.params.store;
         const client = await connectDB();
-        const database = client.db(store);
+        const dbname = getDBname(req)
+        const database = client.db(dbname);
         const salesCollection = database.collection('sales');
         const salesData = await salesCollection.find({}).toArray();
         

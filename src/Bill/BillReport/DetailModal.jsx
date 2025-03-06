@@ -11,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { FaCheck } from "react-icons/fa6";
 import { RxCross1 } from "react-icons/rx";
 import BillDetailgeneratePDF from "./BillDetailgeneratePDF";
+import { jwtDecode } from "jwt-decode";
 
 const fetchBillDetailData = async (id, storeData) => {    
     const { data } = await axiosInstance.get(`/api/viewreport/${storeData}/${id}`);    

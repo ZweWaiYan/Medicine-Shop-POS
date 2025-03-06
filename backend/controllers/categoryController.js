@@ -40,7 +40,6 @@ async function addCategory(req,res){
             res.status(200).json({message : `Category '${name}' already exists`});
         }
     }catch(error){
-        console.log(error)
         if (error.code === 8000) {
             return res.status(403).send({ message: "You can't create category on another user's database." });
         }
@@ -58,7 +57,6 @@ async function fetchCategory(req,res){
         const categories = await categoryCollection.find().toArray();
         res.json(categories);
     }catch(error){
-        console.log(error);
         res.status(500).json({ error: "Error fetching categories"})
     }
 }
@@ -80,7 +78,6 @@ async function updateCategory(req,res){
 
         res.status(200).json({ message: "Category updated successfully" });
     }catch(error){
-        console.log(error);
         if (error.code === 8000) {
             return res.status(403).send({ message: "You edit another user's data." });
         }
@@ -100,7 +97,6 @@ async function deleteCategory(req,res){
         }
         res.status(200).json({message:"Category deleted successfully."})
     }catch(error){
-        console.log(error)
         return res.status(500).json({message:"Error deleting category."})
     }
 }

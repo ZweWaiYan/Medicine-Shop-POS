@@ -12,10 +12,12 @@ import BillReportFilterModal from "./BillReportFilterModal";
 import DetailModal from "./DetailModal";
 
 import BillReportgeneratePDF from "./BillReportgeneratePDF";
+import { jwtDecode } from "jwt-decode";
 
 const fetchSaleData = async ({ queryKey }) => {
-  const store = queryKey[1];
-  const { data } = await axiosInstance.get(`/api/viewreport/${store}`);
+  const [, selectedStore] = queryKey;
+  if (!selectedStore) return [];
+  const { data } = await axiosInstance.get(`/api/viewreport?store=${selectedStore}`);
   return data;
 };
 
@@ -29,16 +31,15 @@ const BillReport = () => {
   const [storeData, setStoreData] = useState("");
 
   useEffect(() => {
-    const fetchStoreData = async () => {
-        try {
-            const response = await axiosInstance.get("/api/getbranch");
-            setStoreData(response.data.storeData); 
-        } catch (error) {
-            console.error("Error fetching store data:", error);
-        }
-    };
-
-    fetchStoreData();
+      const token = localStorage.getItem("token");
+      if (token) {
+          try {
+              const decodedToken = jwtDecode(token);
+              setStoreData(decodedToken.branch);
+          } catch (error) {
+              console.error("Invalid token:", error);
+          }
+      }
   }, []);
   
   const [filterSearchText, setFilterSearchText] = useState("bill_id");

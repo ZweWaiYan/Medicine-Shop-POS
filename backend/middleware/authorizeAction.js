@@ -1,5 +1,4 @@
 const getDbName = require('../controllers/getDBname');
-const getRole = require('../controllers/getRole');
 const authorizeAction = (action) => {
 
     return (req, res, next) => {
@@ -9,11 +8,8 @@ const authorizeAction = (action) => {
             return next(); 
         }
 
-        getRole()
-            .then(roleInfo => console.log(roleInfo))
-            .catch(error => console.error('Failed to get role:', error));
-        const { role, branch } = req.user;
-        
+        const role = req.user.role;
+        const branch = req.user.branch;
 
         if (role === 'admin') {
             return next();

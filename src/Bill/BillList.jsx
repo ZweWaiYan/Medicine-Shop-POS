@@ -19,12 +19,15 @@ import { FaCheck } from "react-icons/fa6";
 import { MdLocalPrintshop } from "react-icons/md";
 
 import PurchaseModal from "./PurchaseModal";
-import generatePDF from "./generatePdf";
+import generatePDF from "./generatePDF";
 import axiosInstance from "../axiosInstance";
+import { jwtDecode } from "jwt-decode";
 
-const fetchSaleData = async () => {
-    const { data } = await axiosInstance.get("/api/allitems");
-    console.log(data)
+const fetchSaleData = async ({ queryKey }) => {
+    const [, selectedStore] = queryKey;
+    if (!selectedStore) return [];
+    const { data } = await axiosInstance.get(`/api/allitems?store=${selectedStore}`);
+    console.log(data);
     return data;
 };
 
@@ -40,13 +43,26 @@ const generateSaleId = () => {
 
 
 const BillList = () => {
+    const [selectedStore, setSelectedStore] = useState("");
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (token) {
+            try {
+                const decodedToken = jwtDecode(token);
+                setSelectedStore(decodedToken.branch);
+            } catch (error) {
+                console.error("Invalid token:", error);
+            }
+        }
+    }, []);
 
     useEffect(() => {
         printButtonRef.current?.focus();
     });
 
     const { data: saleData, isLoading, error } = useQuery({
-        queryKey: ["saleData"],
+        queryKey: ["saleData", selectedStore],
         queryFn: fetchSaleData,
     });
 
@@ -68,30 +84,6 @@ const BillList = () => {
 
     if (isLoading) return <p>Loading...</p>;
     if (error) return <p>Error: {error.message}</p>;
-
-    /*
-        const handleCheckout = (e) => {
-            //e.preventDefault();
-            
-            if (e.key === "Enter" || e.type === "click") {
-                const item = saleData.find(item => item[filterSearchText] === searchText);
-                
-                if (!item) {
-                    toast.error("Item not found!");
-                    return;
-                }
-        
-                setCart([...cart, { ...item, quantity }]);
-                setSearchText("");
-                setFoundedItem(null);
-                setSuggestions([]);
-                setQuantity(1);
-                searchInputRef.current?.focus();
-            } else if (e.key === "Tab") {
-                doneButtonRef.current?.focus();
-            }
-        };*/
-
 
     const handleCheckout = (inputValue) => {
         // Find item by barcode or item_code
@@ -121,26 +113,6 @@ const BillList = () => {
         searchInputRef.current?.focus();
     };
 
-    /*     
-          const handleSearchInput = (e) => {
-            const query = e.target.value;
-            setSearchText(query);
-          
-            if (query.length > 0) {
-              const filtered = saleData.filter(item =>
-                item[filterSearchText].toLowerCase().includes(query.toLowerCase())
-              );
-              setSuggestions(filtered);
-            } else {
-              setSuggestions([]);
-            }
-          
-            const item = saleData.find(i => i.barcode === query);
-            if (item) {
-              handleCheckout(query);
-            }
-          };
-    */
     const handleSearchChange = (e) => {
         const query = e.target.value;
         setSearchText(query);
@@ -227,7 +199,7 @@ const BillList = () => {
         console.log("saleData" , saleData);
 
         try {
-            await axiosInstance.post("/api/addsale", saleData);
+            await axiosInstance.post(`/api/addsale?store=${selectedStore}`, saleData);
             toast.success("Sale recorded successfully!");
 
             //console.log("isPrint" , isPrint);
@@ -246,19 +218,6 @@ const BillList = () => {
     const handleRemove = (itemId) => {
         setCart(cart.filter(item => item._id !== itemId));
     };
-    /*
-        const updateInventory = async () => {
-            try {
-                for (const item of cart) {
-                    await axios.put(`/api/updateQuantity/${item._id}`, { quantity: item.quantity });
-                }
-                toast.success("Purchase successful! Inventory updated.");
-            } catch (error) {
-                toast.error("Failed to update inventory.");
-                console.error("Error updating inventory:", error);
-            }
-        };
-    */
 
     return (
         <div className="p-4 w-full flex-col justify-between">
