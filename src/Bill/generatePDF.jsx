@@ -2,8 +2,7 @@ import jsPDF from "jspdf";
 import { autoTable } from 'jspdf-autotable';
 
 const generatePDF = (cart,saleData) => {
-    
-    console.log("saleDate pdf" , saleData);
+        
     const doc = new jsPDF();
     const currentDate = new Date().toLocaleString(); 
 

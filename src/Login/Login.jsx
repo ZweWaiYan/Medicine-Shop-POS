@@ -16,8 +16,7 @@ const Login = () => {
         setError("");
 
         try {
-            const res = await axios.post("/api/login", { username, password });
-            //console.log("Login Response:", res.data);
+            const res = await axios.post("/api/login", { username, password });            
 
             localStorage.setItem("token", res.data.token);
             //alert("Login Success.")

@@ -52,11 +52,11 @@ const CategoryModal = ({ showModal, closeModal, selectedStore }) => {
         mutationFn: ({ name, selectedStore }) => addCategory({ name, selectedStore }), 
         onSuccess: (data) => {
             queryClient.invalidateQueries(["category"]);
-            toast.success(data.message);
+            // toast.success(data.message);
         },
         onError: (error) => {
             console.error("Error updating category:", error);
-            toast.error("Failed to update category.");
+            // toast.error("Failed to update category.");
         }
     });
 

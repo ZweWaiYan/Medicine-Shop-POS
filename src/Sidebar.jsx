@@ -17,8 +17,10 @@ const Sidebar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-
-    navigate('/');
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = '/';
+    }
   };
 
   const SIDERBAR_LINKS = [
@@ -48,7 +50,7 @@ const Sidebar = () => {
             </li>
           ))
         }
-        <li       
+        <li
           className={`font-medium rounded-md py-2 px-5 hover:bg-gray-300 hover:text-indigo-500`}
         >
           <Link

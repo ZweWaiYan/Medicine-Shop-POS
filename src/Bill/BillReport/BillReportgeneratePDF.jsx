@@ -12,8 +12,7 @@ const BillReportgeneratePDF = (saleData) => {
     const tableColumn = ["ID", "Date", "Discount", "Cash Back", "Total" , "Amount Paid" , "Remain Balance"];
     const tableRows = [];
 
-    saleData.forEach((saleData) => {
-        console.log("saleData" , saleData);
+    saleData.forEach((saleData) => {        
         const rowData = [
             saleData.saleId,
             saleData.date,

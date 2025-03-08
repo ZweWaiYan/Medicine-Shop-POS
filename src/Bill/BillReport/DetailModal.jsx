@@ -113,7 +113,7 @@ const DetailModal = ({ showModal, closeModal, item, storeData }) => {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={handleCancel}
-                                className="px-4 py-2 bg-gray-400 text-white rounded"
+                                className="px-4 py-2 bg-[#B9E5E6] text-black rounded"
                             >
                                 Cancel
                             </motion.button>
@@ -121,7 +121,7 @@ const DetailModal = ({ showModal, closeModal, item, storeData }) => {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={handlePrint}
-                                className="px-4 py-2 bg-orange-400 text-white rounded"
+                                className="px-4 py-2 bg-[#04C9D1] text-black rounded"
                             >
                                 Print
                             </motion.button>

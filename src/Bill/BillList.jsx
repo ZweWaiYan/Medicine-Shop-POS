@@ -23,11 +23,10 @@ import generatePDF from "./generatePDF";
 import axiosInstance from "../axiosInstance";
 import { jwtDecode } from "jwt-decode";
 
-const fetchSaleData = async ({ queryKey }) => {
-    const [, selectedStore] = queryKey;
+const fetchSaleData = async ({ queryKey }) => {    
+    const selectedStore = queryKey[1];    
     if (!selectedStore) return [];
-    const { data } = await axiosInstance.get(`/api/allitems?store=${selectedStore}`);
-    console.log(data);
+    const { data } = await axiosInstance.get(`/api/allitems?store=${selectedStore}`);    
     return data;
 };
 
@@ -50,7 +49,7 @@ const BillList = () => {
         if (token) {
             try {
                 const decodedToken = jwtDecode(token);
-                setSelectedStore(decodedToken.branch);
+                setSelectedStore((prev) => prev !== decodedToken.branch ? decodedToken.branch : prev);
             } catch (error) {
                 console.error("Invalid token:", error);
             }
@@ -64,6 +63,7 @@ const BillList = () => {
     const { data: saleData, isLoading, error } = useQuery({
         queryKey: ["saleData", selectedStore],
         queryFn: fetchSaleData,
+        enabled: !!selectedStore,
     });
 
     const searchInputRef = useRef(null);
@@ -114,15 +114,17 @@ const BillList = () => {
     };
 
     const handleSearchChange = (e) => {
-        const query = e.target.value;
+        const query = e.target.value.trim().toLowerCase();
         setSearchText(query);
 
+        // Ensure saleData is an array before using find
         const matchedItem = saleData.find(item =>
-            item[filterSearchText]?.toLowerCase() === query.toLowerCase().trim()
+            item[filterSearchText]?.toLowerCase() === query
         );
+
         setFoundedItem(matchedItem);
 
-        if (matchedItem && filterSearchText === 'barcode' || matchedItem && filterSearchText === 'item_code') {
+        if (matchedItem && (filterSearchText === 'barcode' || filterSearchText === 'item_code')) {
             handleCheckout(query);
         }
     };
@@ -132,12 +134,11 @@ const BillList = () => {
             const query = e.target.value;
             const matchedItem = saleData.find(item =>
                 item[filterSearchText]?.toLowerCase() === query.toLowerCase().trim()
-            );            
+            );
 
             if (matchedItem) {
                 handleCheckout(query);
-            } else {
-                //console.log(matchedItem)
+            } else {          
                 toast.error("Item not found!");
             }
         }
@@ -185,7 +186,7 @@ const BillList = () => {
             subtotal,
             discount,
             cashBack,
-            total,  
+            total,
             amountPaid,
             remainingBalance: total - amountPaid,
             items: cart.map(item => ({
@@ -195,14 +196,12 @@ const BillList = () => {
                 price: item.price,
                 quantity: item.quantity,
             }))
-        };
-        console.log("saleData" , saleData);
+        };        
 
         try {
             await axiosInstance.post(`/api/addsale?store=${selectedStore}`, saleData);
             toast.success("Sale recorded successfully!");
-
-            //console.log("isPrint" , isPrint);
+            
             isPrint === "done" ? generatePDF(cart, saleData) : "";
 
             setCart([]);
@@ -225,7 +224,7 @@ const BillList = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
                     <div className="col-span-2">
                         <div className="relative">
-                            <div className="flex  items-center rounded-md bg-white pl-3 outline -outline-offset-1 outline-gray-300 has-[*:focus-within]:outline-2 has-[*:focus-within]:-outline-offset-2 has-[*:focus-within]:outline-indigo-600">
+                            <div className="flex  items-center rounded-md bg-white pl-3 outline -outline-offset-1 outline-[#4FB1B4] has-[*:focus-within]:outline-2 has-[*:focus-within]:-outline-offset-2 has-[*:focus-within]:outline-indigo-600">
                                 <div className="grid shrink-0 grid-cols-1 focus-within:relative">
                                     <select
                                         value={filterSearchText}
@@ -247,7 +246,7 @@ const BillList = () => {
                                     value={searchText}
                                     onChange={handleSearchChange}
                                     onKeyDown={handleSearchKeyDown}
-                                    className="block min-w-0 grow h-[50px] py-1.5 pr-3 pl-3 text-base  text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
+                                    className="block min-w-0 grow h-[60px] py-1.5 pr-3 pl-3 text-base  text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                                 />
                             </div>
                         </div>
@@ -260,10 +259,10 @@ const BillList = () => {
                                     ref={printButtonRef}
                                     tabIndex={1}
                                     onKeyDown={(e) => handleKeyDown(e, doneButtonRef)}
-                                    className="flex justify-around px-4 py-4  bg-orange-500 text-white rounded hover:bg-orange-400 text-sm"
+                                    className="flex justify-around px-4 py-3.5  bg-[#B9E5E6]  border-2 border-[#45ACB1] text-white rounded hover:bg-[#ACD6D0] text-sm"
                                 >
-                                    <MdLocalPrintshop className="m-auto " />
-                                    <div className="hidden md:block ml-4">Print</div>
+                                    <MdLocalPrintshop className="m-auto text-black" />
+                                    <div className="hidden md:block ml-4 text-black">Print</div>
                                 </button>
                             </div>
                         </div>
@@ -274,10 +273,10 @@ const BillList = () => {
                                     ref={doneButtonRef}
                                     tabIndex={2}
                                     onKeyDown={(e) => handleKeyDown(e, printButtonRef)}
-                                    className="flex justify-around px-4 py-4 bg-green-500 text-white rounded hover:bg-green-400 text-sm"
+                                    className="flex justify-around px-4 py-4 bg-[#04C9D1] text-white rounded hover:bg-[#04E2EB] text-sm"
                                 >
-                                    <FaCheck className="m-auto" />
-                                    <div className="hidden md:block ml-4">Done</div>
+                                    <FaCheck className="m-auto text-black" />
+                                    <div className="hidden md:block ml-4 text-black">Done</div>
                                 </button>
                             </div>
                         </div>
@@ -291,7 +290,7 @@ const BillList = () => {
                         <thead>
                             <tr>
                                 {["ItemCode", "Name", "quantity", "Price", "Actions"].map((heading) => (
-                                    <th key={heading} className="px-2 md:px-4 py-2 text-sm md:text-lg text-center bg-gray-100">
+                                    <th key={heading} className="px-2 md:px-4 py-2 text-sm md:text-lg text-center  bg-[#DBE8F8]">
                                         {heading}
                                     </th>
                                 ))}
@@ -332,7 +331,7 @@ const BillList = () => {
                         <p className="font-bold text-3xl">Shop Name</p>
                         <p className="text-1xl">09-XXXXXXXXX</p>
                     </div>
-                    <div className="grid grid-cols-2 font-bold text-2xl text-orange-500">
+                    <div className="grid grid-cols-2 font-bold text-2xl text-[#04C9D1]">
                         <div>
                             Total:
                         </div>

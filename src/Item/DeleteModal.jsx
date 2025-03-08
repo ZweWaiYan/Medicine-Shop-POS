@@ -53,8 +53,7 @@ const DeleteModal = ({ showModal, closeModal, item, onDelete, selectedStore }) =
                         exit={{ scale: 0.8, opacity: 0 }}
                         transition={{ duration: 0.3, ease: "easeInOut" }}
                     >
-                        <h2 className="text-2xl font-bold mb-4">Delete item</h2>
-                        {console.log(item)}
+                        <h2 className="text-2xl font-bold mb-4">Delete item</h2>                        
                         <p>Are you sure you want to delete {item.name}?</p>
                         <div className="mt-4 flex justify-between">
                             <motion.button

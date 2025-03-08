@@ -28,17 +28,17 @@ const fetchSaleData = async (store) => {
 const ItemList = () => {
   const [selectedStore, setSelectedStore] = useState("");
   useEffect(() => {
-      const token = localStorage.getItem("token");
-      if (token) {
-          try {
-              const decodedToken = jwtDecode(token);
-              setSelectedStore(decodedToken.branch);
-          } catch (error) {
-              console.error("Invalid token:", error);
-          }
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token);
+        setSelectedStore(decodedToken.branch);
+      } catch (error) {
+        console.error("Invalid token:", error);
       }
+    }
   }, []);
-  
+
   const { data: saleData, isLoading, error } = useQuery({
     queryKey: ["saleData", selectedStore],
     queryFn: () => fetchSaleData(selectedStore),
@@ -79,7 +79,7 @@ const ItemList = () => {
   const handleDelete = (_id) => {
     const item = saleData.find((row) => row._id === _id);
     setDeleteCurrentItem(item);
-    setShowDeleteModal(true);
+    setShowDeleteModal(true);    
     setSelectedStore(selectedStore);
   };
 
@@ -144,8 +144,16 @@ const ItemList = () => {
       <div className="flex flex-col md:flex-row justify-between pb-7">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pr-3 w-full">
           <div>
-            <div className="mt-2">
-              <div className="flex items-center rounded-md bg-white pl-3 outline -outline-offset-1 outline-gray-300 has-[*:focus-within]:outline-2 has-[*:focus-within]:-outline-offset-2 has-[*:focus-within]:outline-indigo-600">
+            <div className="flex md:flex-row flex-col w-full">
+              <select
+                value={selectedStore}
+                onChange={(e) => setSelectedStore(e.target.value)}
+                className="w-full h-[60px]  flex items-center rounded-md bg-white pr-6 pl-3 outline -outline-offset-1 outline-[#4FB1B4] has-[*:focus-within]:outline-2 has-[*:focus-within]:-outline-offset-2 has-[*:focus-within]:outline-indigo-600"
+              >
+                <option value="storeA">Store A</option>
+                <option value="storeB">Store B</option>                
+              </select>
+              <div className="w-full mt-3 md:mt-0 ml-0 md:ml-3 flex h-[60px] items-center rounded-md bg-white pl-3 outline -outline-offset-1 outline-[#4FB1B4] has-[*:focus-within]:outline-2 has-[*:focus-within]:-outline-offset-2 has-[*:focus-within]:outline-indigo-600">
                 <input
                   type="text"
                   placeholder="Search....."
@@ -171,35 +179,21 @@ const ItemList = () => {
               </div>
             </div>
           </div>
-          <div className="flex justify-between mt-4 md:mt-0">
-            {/* Store Dropdown */}
-            <div className="mr-4">
-              <label className="mr-2 text-gray-700 font-semibold">Select Store:</label>
-              <select
-                value={selectedStore}
-                onChange={(e) => setSelectedStore(e.target.value)}
-                className="p-2 border rounded"
-              >
-                <option value="storeA">Store A</option>
-                <option value="storeB">Store B</option>
-                {/* Add more store options as needed */}
-              </select>
-            </div>
-  
+          <div className="flex justify-between mt-4 md:mt-0 w-full">
             <FaFilter
               onClick={() => { setShowFilterModal(!showFilterModal); resetFilter(); }}
-              className="h-6 w-6 text-gray-500 ml-4 my-4 cursor-pointer"
+              className="h-6 w-6 text-gray-500 ml-4 cursor-pointer my-auto"
             />
-            <div>
+            <div className="my-auto">
               <button
                 onClick={handleCategory}
-                className="px-4 py-2 mr-5 h-[50px] bg-orange-500 text-white rounded hover:bg-yellow-400 text-sm"
+                className="px-4 py-2 mr-5 h-[50px] bg-[#B9E5E6] border-2 border-[#45ACB1] text-black rounded hover:bg-[#ACD6D0] text-sm"
               >
                 Category
               </button>
               <button
                 onClick={handleCreate}
-                className="px-4 py-2 h-[50px] bg-blue-500 text-white rounded hover:bg-blue-400 text-sm"
+                className="px-4 py-2 h-[50px] bg-[#04C9D1] text-black rounded hover:bg-[#04E2EB] text-sm"
               >
                 Create
               </button>
@@ -207,7 +201,7 @@ const ItemList = () => {
           </div>
         </div>
       </div>
-  
+
       {/* Modals */}
       {showFilterModal && (
         <FilterModal showModal={showFilterModal} closeModal={() => setShowFilterModal(false)} handleFilter={handleFilterFunc} />
@@ -215,56 +209,87 @@ const ItemList = () => {
       {showCategoryModal && (
         <CategoryModal showModal={showCategoryModal} selectedStore={selectedStore} closeModal={() => setShowCategoryModal(false)} />
       )}
-  
+
       {/* Table */}
       <div className="overflow-auto">
         <table className="min-w-full border-collapse border border-gray-300">
           <thead>
             <tr>
-              {["Image", "item_code", "Barcode", "Name", "Category", "quantity", "Price", "expire_date", "Remark", "Actions"].map((heading) => (
-                <th key={heading} className="px-2 md:px-4 py-2 border text-sm md:text-lg text-center bg-gray-100">
-                  {heading}
-                </th>
-              ))}
+              {["Image", "Item Code", "Barcode", "Name", "Category", "Quantity", "Price", "Expire Date", "Remark", "Actions"].map(
+                (heading) => (
+                  <th
+                    key={heading}
+                    className="w-1/10 px-2 md:px-4 py-2 border text-sm md:text-lg text-center bg-[#DBE8F8]"
+                  >
+                    {heading}
+                  </th>
+                )
+              )}
             </tr>
           </thead>
           <tbody>
             {filteredSaleData.length > 0 ? (
               filteredSaleData.map((data) => (
-                <tr key={data._id} className={`border-b 
-                  ${data.expire_date && data.is_expired ? "border-4 border-b-4 border-red-500" :
-                  data.alert_date && data.is_alerted ? "border-4 border-b-4 border-yellow-500" : "border-gray-300"}`}
+                <tr
+                  key={data._id}
+                  className={`border-2 ${data.expire_date && data.is_expired
+                    ? "bg-[#E4EEF8]"
+                    : data.alert_date && data.is_alerted
+                      ? "bg-[#E4EEF8]"
+                      : ""
+                    }`}
                 >
-                  <td className="px-2 md:px-4 py-2 border">
-                    <img src={data.image_path} alt="" className="w-12 h-12 md:w-16 md:h-16 m-auto" />
+                  <td className="w-1/10 px-2 md:px-4 py-2 border">
+                    <img
+                      src={data.image_path}
+                      alt=""
+                      className="w-12 h-12 md:w-16 md:h-16 m-auto"
+                    />
                   </td>
-                  <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.item_code}</td>
-                  <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.barcode}</td>
-                  <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.name}</td>
-                  <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.category}</td>
-                  <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.quantity}</td>
-                  <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.price}</td>
+                  <td className="w-1/10 px-2 md:px-4 py-2 border text-center text-sm">
+                    {data.item_code}
+                  </td>
+                  <td className="w-1/10 px-2 md:px-4 py-2 border text-center text-sm">
+                    {data.barcode}
+                  </td>
+                  <td className="w-32 px-2 md:px-4 py-2 border text-center text-sm">
+                    {data.name}
+                  </td>
+                  <td className="w-1/10 px-2 md:px-4 py-2 border text-center text-sm">
+                    {data.category}
+                  </td>
+                  <td className="w-1/10 px-2 md:px-4 py-2 border text-center text-sm">
+                    {data.quantity}
+                  </td>
+                  <td className="w-1/10 px-2 md:px-4 py-2 border text-center text-sm">
+                    {data.price}
+                  </td>
                   <td
-                    className={`px-2 md:px-4 py-2 border text-center text-sm 
-                      ${data.expire_date && data.is_expired ? "bg-red-500 text-white" :
-                        data.alert_date && data.is_alerted ? "bg-yellow-500 text-white" : ""}`}
+                    className={`w-32 px-2 md:px-4 py-2 border text-center text-sm ${data.expire_date && data.is_expired
+                      ? "bg-[#86909C] text-black"
+                      : data.alert_date && data.is_alerted
+                        ? "bg-[#ADCBEF] text-black"
+                        : ""
+                      }`}
                   >
                     {data.expire_date ? data.expire_date.split("T")[0] : "Doesn't Expire"}
                   </td>
-                  <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.remark}</td>
-                  <td className="px-2 md:px-4 py-2 border text-center border-gray-300">
+                  <td className="w-1/10 px-2 md:px-4 py-2 border text-center text-sm">
+                    {data.remark}
+                  </td>
+                  <td className="w-10 px-2 md:px-4 py-2 border text-center border-gray-300">
                     <div>
                       <button
-                        className="px-3 py-1 mb-2 md:px-4 md:py-2 bg-green-500 text-white hover:bg-green-400 rounded text-xs md:text-sm"
+                        className="px-3 py-1 mb-2 md:px-4 md:py-2 bg-[#80CED0] text-white hover:bg-[#05EBE5] rounded text-xs md:text-sm"
                         onClick={() => handleEdit(data._id)}
                       >
-                        <TbEdit />
+                        <TbEdit className="text-black" />
                       </button>
                       <button
-                        className="px-3 py-1 md:px-4 md:py-2 bg-red-500 text-white hover:bg-red-400 rounded text-xs md:text-sm"
+                        className="px-3 py-1 md:px-4 md:py-2 bg-[#1E7998] text-white hover:bg-[#279CC4] rounded text-xs md:text-sm"
                         onClick={() => handleDelete(data._id)}
                       >
-                        <AiOutlineDelete />
+                        <AiOutlineDelete className="text-black" />
                       </button>
                     </div>
                   </td>
@@ -279,23 +304,26 @@ const ItemList = () => {
             )}
           </tbody>
         </table>
+
       </div>
-  
-      {/* Modals */}
-      <Modal showModal={showModal} closeModal={() => setShowModal(false)} item={currentItem} onSave={doCreate} tableData={saleData} selectedStore={selectedStore}  />
-      {deleteCurrentItem && (
-        <DeleteModal
-          showModal={showDeleteModal}
-          closeModal={() => setShowDeleteModal(false)}
-          item={deleteCurrentItem}
-          selectedStore={selectedStore}
-          onDelete={doDelete}
-        />
-      )}
-  
+
+      <Modal showModal={showModal} closeModal={() => setShowModal(false)} item={currentItem} onSave={doCreate} tableData={saleData} selectedStore={selectedStore} />
+
+      {
+        deleteCurrentItem && (
+          <DeleteModal
+            showModal={showDeleteModal}
+            closeModal={() => setShowDeleteModal(false)}
+            item={deleteCurrentItem}
+            onDelete={doDelete}
+            selectedStore={selectedStore}
+          />
+        )
+      }
+
       <ToastContainer />
     </div>
-  );  
+  );
 };
 
 export default ItemList;

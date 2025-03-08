@@ -14,33 +14,33 @@ const addCategory = async ({ name, selectedStore }) => {
   return response.data;
 };
 
-const fetchCategories = async (selectedStore) => {
-    const { data } = await axiosInstance.get(`/api/fetchcategory?store=${selectedStore}`);
-    return data;
+const fetchCategories = async (selectedStore) => {  
+  const { data } = await axiosInstance.get(`/api/fetchcategory?store=${selectedStore}`);  
+  return data;
 };
 
 const Modal = ({ showModal, closeModal, item, onSave, tableData, selectedStore }) => {
   const [fields, setFields] = useState({});
   const [errors, setErrors] = useState({});
- 
+
   const [newCategory, setNewCategory] = useState("");
   const [isAddCategory, setIsAddCategory] = useState(false);
 
   const { data: category, isLoading, isError, refetch } = useQuery({
-    queryKey: ["category", selectedStore], 
+    queryKey: ["category", selectedStore],
     queryFn: () => fetchCategories(selectedStore),
   });
 
   const addMutation = useMutation({
-      mutationFn: ({ name, selectedStore }) => addCategory({ name, selectedStore }), 
-      onSuccess: (data) => {
-          queryClient.invalidateQueries(["category"]);
-          toast.success(data.message);
-      },
-      onError: (error) => {
-          console.error("Error updating category:", error);
-          toast.error("Failed to update category.");
-      }
+    mutationFn: ({ name, selectedStore }) => addCategory({ name, selectedStore }),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["category"]);
+      toast.success(data.message);
+    },
+    onError: (error) => {
+      console.error("Error updating category:", error);
+      toast.error("Failed to update category.");
+    }
   });
 
   const handleAddCategory = () => {
@@ -309,13 +309,13 @@ const Modal = ({ showModal, closeModal, item, onSave, tableData, selectedStore }
                                 } ${errors[field] ? "border-red-500" : ""}`}
                               disabled={isAddCategory}
                             >
-                            <option value="">Select a category</option>
-                            {Array.isArray(category) &&
-                              category.map((cat) => (
-                                <option key={cat._id} value={cat.name}>
-                                  {cat.name}
-                                </option>
-                              ))}
+                              <option value="">Select a category</option>                              
+                              {Array.isArray(category) &&
+                                category.map((cat) => (
+                                  <option key={cat._id} value={cat.name}>                                    
+                                    {cat.name}
+                                  </option>
+                                ))}
                               {/* <option value="Add">+ Add Category</option> */}
                             </select>
                             {/* {isAddCategory && (
@@ -384,7 +384,7 @@ const Modal = ({ showModal, closeModal, item, onSave, tableData, selectedStore }
                               value={fields[field] || ""}
                               onKeyDown={(e) => {
                                 if (e.key === "Enter" && !e.shiftKey) {
-                                  e.preventDefault(); 
+                                  e.preventDefault();
                                   handleSubmit();
                                 }
                               }}

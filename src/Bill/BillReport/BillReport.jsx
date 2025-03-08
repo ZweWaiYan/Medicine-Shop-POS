@@ -117,7 +117,7 @@ const BillReport = () => {
           <p className="col-span-1 text-3xl font-bold">{storeData}</p>
           <div className="flex md:flex-row flex-col w-full">
             <div className="flex md:flex-row flex-col w-full">
-              <div className="w-full mr-3 flex items-center rounded-md bg-white pl-3 outline -outline-offset-1 outline-gray-300 has-[*:focus-within]:outline-2 has-[*:focus-within]:-outline-offset-2 has-[*:focus-within]:outline-indigo-600">
+              <div className="w-full mr-3 flex items-center rounded-md bg-white pl-3 outline -outline-offset-1 outline-[#4FB1B4] has-[*:focus-within]:outline-2 has-[*:focus-within]:-outline-offset-2 has-[*:focus-within]:outline-indigo-600">
                 <select
                   value={storeData}
                   onChange={(e) => { setStoreData(e.target.value) }}
@@ -131,7 +131,7 @@ const BillReport = () => {
                   className="pointer-events-none col-start-1 row-start-1 pl-2 mr-3 size-5 self-center justify-self-end text-gray-500 sm:size-4"
                 />
               </div>
-              <div className="w-full flex mt-3 md:mt-0 items-center rounded-md bg-white pl-3 outline -outline-offset-1 outline-gray-300 has-[*:focus-within]:outline-2 has-[*:focus-within]:-outline-offset-2 has-[*:focus-within]:outline-indigo-600">
+              <div className="w-full flex mt-3 md:mt-0 items-center rounded-md bg-white pl-3 outline -outline-offset-1 outline-[#4FB1B4] has-[*:focus-within]:outline-2 has-[*:focus-within]:-outline-offset-2 has-[*:focus-within]:outline-indigo-600">
                 <input
                   type="text"
                   placeholder="Search Bill ID....."
@@ -148,14 +148,14 @@ const BillReport = () => {
               <div>
                 <button
                   onClick={resetFilter}
-                  className="px-4 py-2 mr-5 h-[50px] bg-red-500 text-white rounded hover:bg-red-400 text-sm"
+                  className="px-4 py-2 mr-5 h-[50px] bg-[#B9E5E6] text-black rounded border-[#45ACB1] text-sm"
                 >
                   {/* <MdOutlineCreateNewFolder /> */}
                   Clear
                 </button>
                 <button
                   onClick={handlePrint}
-                  className="px-4 py-2 h-[50px] bg-orange-500 text-white rounded hover:bg-orange-400 text-sm"
+                  className="px-4 py-2 h-[50px] bg-[#04C9D1] text-black rounded hover:bg-[#04E2EB] text-sm"
                 >
                   {/* <MdOutlineCreateNewFolder /> */}
                   Print
@@ -183,7 +183,7 @@ const BillReport = () => {
           <thead>
             <tr>
               {["ID", "Date", "Discount", "Cash Back", "Total", "Amount Paid", "Remain Balance", "Action"].map((heading) => (
-                <th key={heading} className="px-2 md:px-4 py-2 border text-sm md:text-lg text-center bg-gray-100">
+                <th key={heading} className="px-2 md:px-4 py-2 border text-sm md:text-lg text-center bg-[#DBE8F8]">
                   {heading}
                 </th>
               ))}
@@ -191,7 +191,7 @@ const BillReport = () => {
           </thead>
           <tbody>
             {filteredSaleDate.length > 0 ? (
-              filteredSaleDate.slice(0, 10).map((data) => (
+              filteredSaleDate.map((data) => (
                 <tr key={data.saleId}>
                   <td className="px-2 md:px-4 py-2 border text-center text-sm">{data.saleId}</td>
                   <td className="px-2 md:px-4 py-2 border text-center text-sm">

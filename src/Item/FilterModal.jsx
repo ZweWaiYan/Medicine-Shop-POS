@@ -74,7 +74,7 @@ const FilterModal = ({ showModal, closeModal, handleFilter }) => {
                     exit={{ opacity: 0 }}
                 >
                     <motion.div
-                        className="bg-white p-8 rounded-lg w-[400px] shadow-lg"
+                        className="bg-white p-8 rounded-lg w-[400px] shadow-lg border-2 border-black"
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.8, opacity: 0 }}
@@ -164,7 +164,7 @@ const FilterModal = ({ showModal, closeModal, handleFilter }) => {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={handleCancel}
-                                className="px-4 py-2 bg-gray-400 text-white rounded"
+                                className="px-4 py-2 bg-[#B9E5E6] text-black rounded"
                             >
                                 Cancel
                             </motion.button>
@@ -172,7 +172,7 @@ const FilterModal = ({ showModal, closeModal, handleFilter }) => {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={handleFilters}
-                                className="px-4 py-2 bg-orange-500 text-white rounded shadow-md"
+                                className="px-4 py-2 bg-[#04C9D1] text-black rounded shadow-md"
                             >
                                 Filter
                             </motion.button>
