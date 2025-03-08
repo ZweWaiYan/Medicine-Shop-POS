@@ -78,6 +78,7 @@ async function signup(req, res) {
         }
 
         const authToken = req.headers.authorization?.split(" ")[1];
+        console.log(authToken)
         if (authToken) {
             try {
                 const decoded = jwt.verify(authToken, process.env.SECRET_KEY);

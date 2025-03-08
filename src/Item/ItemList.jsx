@@ -19,6 +19,7 @@ import FilterModal from "./FilterModal";
 import { filter } from "framer-motion/client";
 import axiosInstance from "../axiosInstance";
 import { jwtDecode } from "jwt-decode";
+import AlertModal from "./AlertModal";
 
 const fetchSaleData = async (store) => {
   const { data } = await axiosInstance.get(`/api/allitems?store=${store}`);
@@ -27,22 +28,50 @@ const fetchSaleData = async (store) => {
 
 const ItemList = () => {
   const [selectedStore, setSelectedStore] = useState("");
+  const [expiredItems, setExpiredItems] = useState([]);
+  const [showAlertModal, setShowAlertModal] = useState(false);
+  const [lowStockItems, setLowStockItems] = useState([]);
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const decodedToken = jwtDecode(token);
-        setSelectedStore(decodedToken.branch);
-      } catch (error) {
-        console.error("Invalid token:", error);
+      const token = localStorage.getItem("token");
+      if (token) {
+          try {
+              const decodedToken = jwtDecode(token);
+              if(decodedToken.role !== 'admin'){
+                  setSelectedStore(decodedToken.branch);
+              }else{
+                setSelectedStore('storeA')
+              }
+              
+          } catch (error) {
+              console.error("Invalid token:", error);
+          }
       }
-    }
   }, []);
-
+  
   const { data: saleData, isLoading, error } = useQuery({
     queryKey: ["saleData", selectedStore],
     queryFn: () => fetchSaleData(selectedStore),
+    enabled: selectedStore !== "",
   });
+
+  console.log(saleData)
+  useEffect(() => {
+    if (saleData) {
+      console.log(saleData);
+  
+      const expired = saleData.filter(item => item.is_expired === 1);
+      setExpiredItems(expired);
+  
+      const lowStock = saleData.filter(item => item.quantity <= 5);
+      console.log('lowstock', lowStock);
+      setLowStockItems(lowStock);
+  
+      if (expired.length > 0 || lowStock.length > 0) {
+        setShowAlertModal(true);
+      }
+    }
+  }, [saleData]);
+
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
@@ -79,7 +108,7 @@ const ItemList = () => {
   const handleDelete = (_id) => {
     const item = saleData.find((row) => row._id === _id);
     setDeleteCurrentItem(item);
-    setShowDeleteModal(true);    
+    setShowDeleteModal(true);
     setSelectedStore(selectedStore);
   };
 
@@ -107,7 +136,7 @@ const ItemList = () => {
   }
 
   // Filtered data based on search 
-  const filteredSaleData = saleData.filter((item) => {
+  const filteredSaleData = saleData ? saleData.filter((item) => {
 
     const matchesSearchText = (() => {
       switch (filterSearchText) {
@@ -133,7 +162,7 @@ const ItemList = () => {
     return matchesSearchText && matchesFilters;
   }).sort((a, b) => {
     return Number(filteredDate.selectedQty) === 1 ? b.quantity - a.quantity : a.quantity - b.quantity;
-  });
+  }):[];
 
   const handleFilterFunc = (selectedExpireDate, selectedPrice, selectedQty, selectedExpired, selectedAlerted, selectedCategory) => {
     setFilteredDate({ selectedExpireDate, selectedPrice, selectedQty, selectedExpired, selectedAlerted, selectedCategory });
@@ -209,7 +238,12 @@ const ItemList = () => {
       {showCategoryModal && (
         <CategoryModal showModal={showCategoryModal} selectedStore={selectedStore} closeModal={() => setShowCategoryModal(false)} />
       )}
-
+      <AlertModal
+      showModal={showAlertModal}
+      closeModal={() => setShowAlertModal(false)}
+      expiredItems={expiredItems}
+      lowStockItems={lowStockItems}
+      />
       {/* Table */}
       <div className="overflow-auto">
         <table className="min-w-full border-collapse border border-gray-300">

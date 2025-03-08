@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FaUser } from "react-icons/fa6";
 import { RiLockPasswordFill } from "react-icons/ri";
+import { jwtDecode } from "jwt-decode";
 
 const Login = () => {
     const [username, setUsername] = useState("");
@@ -15,13 +16,25 @@ const Login = () => {
         e.preventDefault();
         setError("");
 
+
         try {
-            const res = await axios.post("/api/login", { username, password });            
-
-            localStorage.setItem("token", res.data.token);
-            //alert("Login Success.")
-
-            navigate("/dashboard");
+            const res = await axios.post("/api/login", { username, password });
+        
+            if (res.data && res.data.token) {
+              const token = res.data.token;
+              localStorage.setItem("token", token);
+        
+              const decodedToken = jwtDecode(token);
+        
+              if (decodedToken && decodedToken.branch) {
+                localStorage.setItem("branch", decodedToken.branch);
+              } else {
+                console.error("Branch not found in token.");
+              }
+              navigate("/dashboard");
+            } else {
+              console.error("Token not found in the response.");
+            }
         } catch (err) {
             console.error("Login Error:", err.response?.data || err.message);
             setError(err.response?.data?.message || "Login failed");

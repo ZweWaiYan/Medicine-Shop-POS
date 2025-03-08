@@ -3,6 +3,7 @@ const { connectDB } = require('../mongodb_connector');
 const Joi = require("joi");
 require('dotenv').config();
 const db = process.env.DB
+const getDbName = require('./getDBname');
 
 // Validation schema
 const saleSchema = Joi.object({
@@ -31,13 +32,15 @@ const saleSchema = Joi.object({
 // Add sale
 async function addsale(req, res) {
     const client = await connectDB();
-    const database = client.db(db);
+    const dbName = getDbName(req);
+    const database = client.db(dbName);
     const salesCollection = database.collection("sales");
 
     const { saleId, date, subtotal, discount, cashBack, total, amountPaid, remainingBalance, items } = req.body;
     const { error } = saleSchema.validate({saleId, date, subtotal, discount, cashBack, total, amountPaid, remainingBalance, items });
 
     if (error) {
+        console.log(error)
         return res.status(400).json({ message: "Invalid input", errors: error.details });
     }
 
@@ -59,7 +62,8 @@ async function addsale(req, res) {
 // Update sale
 async function updatesale(req, res) {
     const client = await connectDB();
-    const database = client.db(db);
+    const dbName = getDbName(req);
+    const database = client.db(dbName);
     const salesCollection = database.collection("sales");
 
     const { saleId } = req.params;
@@ -90,7 +94,8 @@ async function updatesale(req, res) {
 // Delete sale
 async function deletesale(req, res) {
     const client = await connectDB();
-    const database = client.db(db);
+    const dbName = getDbName(req);
+    const database = client.db(dbName);
     const salesCollection = database.collection("sales");
 
     const { saleId } = req.params;
@@ -115,7 +120,8 @@ async function deletesale(req, res) {
 // Fetch sale by ID
 async function fetchsalebyId(req, res) {
     const client = await connectDB();
-    const database = client.db(db);
+    const dbName = getDbName(req);
+    const database = client.db(dbName);
     const salesCollection = database.collection("sales");
 
     const { saleId } = req.params;
@@ -143,7 +149,8 @@ async function fetchsalebyId(req, res) {
 // Fetch all sales
 async function fetchsales(req, res) {
     const client = await connectDB();
-    const database = client.db(db);
+    const dbName = getDbName(req);
+    const database = client.db(dbName);
     const salesCollection = database.collection("sales");
 
     try {

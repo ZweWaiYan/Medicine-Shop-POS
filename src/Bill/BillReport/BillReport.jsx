@@ -10,7 +10,7 @@ import { FaAngleDown } from "react-icons/fa6";
 
 import BillReportFilterModal from "./BillReportFilterModal";
 import DetailModal from "./DetailModal";
-
+import BillReportgenerateExcel from "./BillReportgenerateExcel";
 import BillReportgeneratePDF from "./BillReportgeneratePDF";
 import { jwtDecode } from "jwt-decode";
 
@@ -101,7 +101,7 @@ const BillReport = () => {
     });
 
   const handlePrint = () => {
-    BillReportgeneratePDF(filteredSaleDate.slice(0, 10));
+    BillReportgenerateExcel(filteredSaleDate.slice(0, 10));
   }
 
 

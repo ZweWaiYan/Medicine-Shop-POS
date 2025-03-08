@@ -11,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { FaCheck } from "react-icons/fa6";
 import { RxCross1 } from "react-icons/rx";
 import BillDetailgeneratePDF from "./BillDetailgeneratePDF";
+import BillDetailgenerateExcel from "./BillDetailgenerateExcel";
 import { jwtDecode } from "jwt-decode";
 
 const fetchBillDetailData = async (id, storeData) => {    
@@ -33,7 +34,8 @@ const DetailModal = ({ showModal, closeModal, item, storeData }) => {
     };
 
     const handlePrint = () => {
-        BillDetailgeneratePDF(saleData);
+        //BillDetailgeneratePDF(saleData);
+        BillDetailgenerateExcel(saleData)
     }
 
     return (

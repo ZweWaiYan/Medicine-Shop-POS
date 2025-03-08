@@ -51,10 +51,10 @@ async function upload(req, res) {
     const barcode = req.body.barcode;
     const name = xss(req.body.name);
     const category = xss(req.body.category);
-    const price = req.body.price;
+    const price = Number(req.body.price);
     const expire_date = xss(req.body.expire_date);
     const alert_date = xss(req.body.alert_date);
-    const quantity = req.body.quantity;
+    const quantity = Number(req.body.quantity);
     const remark = xss(req.body.remark);
     const image_path = req.file ? `/images/${req.file.filename}` : null;
 

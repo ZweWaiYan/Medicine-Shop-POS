@@ -1,7 +1,7 @@
 const { MongoClient } = require("mongodb");
 require('dotenv').config();
-
-const uri = `mongodb+srv://${process.env.DBUSER}:${process.env.DBPASS}@pharmacydb.809xe.mongodb.net/?retryWrites=true&w=majority&appName=${process.env.DB}`
+//&appName=${process.env.DB}
+const uri = `mongodb+srv://${process.env.DBUSER}:${process.env.DBPASS}@pharmacydb.809xe.mongodb.net/?retryWrites=true&w=majority`
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 async function connectDB() {

@@ -6,6 +6,8 @@ import axios from "axios";
 
 const AdminRegister = () => {
     const navigate = useNavigate();
+    const token = localStorage.getItem('token');
+
 
     const [formData, setFormData] = useState({
         username: "",
@@ -30,7 +32,14 @@ const AdminRegister = () => {
                 username: formData.username,
                 password: formData.password,
                 confirmPassword: formData.confirmPassword
-            });
+            },
+            {
+                headers: {
+                    Authorization: token ? `Bearer ${token}` : "",
+                },
+            }
+
+        );
 
             setSuccess(response.data.message || "Registration successful!");
             setFormData({ username: "", password: "", confirmPassword: "" });
@@ -38,7 +47,8 @@ const AdminRegister = () => {
             setTimeout(() => {
                 navigate("/");
             }, 2000);
-        } catch (err) {            
+        } catch (err) {
+            console.log()
             setError(err.response.data.message || "Registration failed");
         }
     };

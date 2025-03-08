@@ -20,8 +20,8 @@ const Sidebar = () => {
     const token = localStorage.getItem('token');
     if (!token) {
       window.location.href = '/';
-    }
-  };
+  }
+};
 
   const SIDERBAR_LINKS = [
     { id: 1, path: "/Dashboard", name: "Dashboard", icon: LuBox },
@@ -50,7 +50,7 @@ const Sidebar = () => {
             </li>
           ))
         }
-        <li
+        <li       
           className={`font-medium rounded-md py-2 px-5 hover:bg-gray-300 hover:text-indigo-500`}
         >
           <Link

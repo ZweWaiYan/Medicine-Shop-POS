@@ -17,16 +17,17 @@ import { FaMinus } from "react-icons/fa6";
 import { FiShoppingCart } from "react-icons/fi";
 import { FaCheck } from "react-icons/fa6";
 import { MdLocalPrintshop } from "react-icons/md";
-
+import generateExcel from "./genreateExcel"
 import PurchaseModal from "./PurchaseModal";
 import generatePDF from "./generatePDF";
 import axiosInstance from "../axiosInstance";
 import { jwtDecode } from "jwt-decode";
 
-const fetchSaleData = async ({ queryKey }) => {    
-    const selectedStore = queryKey[1];    
+const fetchSaleData = async ({ queryKey }) => {
+    const [, selectedStore] = queryKey;
     if (!selectedStore) return [];
-    const { data } = await axiosInstance.get(`/api/allitems?store=${selectedStore}`);    
+    const { data } = await axiosInstance.get(`/api/allitems?store=${selectedStore}`);
+    console.log(data);
     return data;
 };
 
@@ -43,6 +44,7 @@ const generateSaleId = () => {
 
 const BillList = () => {
     const [selectedStore, setSelectedStore] = useState("");
+    const [itemQuantity, setItemQuantity] = useState({});
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -63,8 +65,18 @@ const BillList = () => {
     const { data: saleData, isLoading, error } = useQuery({
         queryKey: ["saleData", selectedStore],
         queryFn: fetchSaleData,
-        enabled: !!selectedStore,
     });
+    let stockQuantities = {};
+
+    if (saleData && Array.isArray(saleData)) {
+        stockQuantities = saleData.reduce((acc, item) => {
+            acc[item.item_code] = item.quantity;
+            return acc;
+        }, {});
+    
+        console.log("Stock Quantities:", stockQuantities);
+    }
+    console.log()
 
     const searchInputRef = useRef(null);
     const printButtonRef = useRef(null);
@@ -78,7 +90,6 @@ const BillList = () => {
     const [foundedItem, setFoundedItem] = useState("");
     const [cart, setCart] = useState([]);
     const [suggestions, setSuggestions] = useState([]);
-    //const [quantity, setQuantity] = useState(1);
 
     const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
@@ -88,36 +99,58 @@ const BillList = () => {
     const handleCheckout = (inputValue) => {
         // Find item by barcode or item_code
         const item = saleData.find(item => item.barcode === inputValue || item.item_code === inputValue);
-
+    
         if (!item) {
             toast.error("Item not found!");
             return;
         }
-
+    
+        const availableStock = item.quantity;
+        const inputQuantity = foundedquantity;
+    
+        if (inputQuantity > availableStock) {
+            toast.error(`Out of stock. Available stock: ${availableStock}`);
+            return;
+        }
+    
         const existingItemIndex = cart.findIndex(cartItem => cartItem.barcode === item.barcode || cartItem.item_code === item.item_code);
-
+    
         setCart(prevCart => {
             if (existingItemIndex !== -1) {
+                const existingItem = prevCart[existingItemIndex];
+                if (existingItem.quantity + foundedquantity > item.quantity) {
+                    toast.error("Cannot add more items than available stock!");
+                    return prevCart; 
+                }
+        
                 return prevCart.map((cartItem, index) =>
-                    index === existingItemIndex ? { ...cartItem, quantity: cartItem.quantity + foundedquantity } : cartItem
+                    index === existingItemIndex
+                        ? { ...cartItem, quantity: cartItem.quantity + foundedquantity }
+                        : cartItem
                 );
             } else {
+                if (foundedquantity > item.quantity) {
+                    toast.error("Cannot add more items than available stock!");
+                    return prevCart;
+                }
+        
                 return [...prevCart, { ...item, quantity: foundedquantity }];
             }
         });
-
+    
         setSearchText("");
         setFoundedItem(null);
         setSuggestions([]);
         setFoundedquantity(1);
         searchInputRef.current?.focus();
     };
+    
+    
 
     const handleSearchChange = (e) => {
         const query = e.target.value.trim().toLowerCase();
         setSearchText(query);
 
-        // Ensure saleData is an array before using find
         const matchedItem = saleData.find(item =>
             item[filterSearchText]?.toLowerCase() === query
         );
@@ -168,18 +201,18 @@ const BillList = () => {
 
     const handleDone = async (isPrint) => {
         searchInputRef.current?.focus();
-
+    
         if (cart.length === 0) {
             toast.error("Cart is empty!");
             return;
         }
-
+    
         const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
         const discount = 0;
         const cashBack = 0;
         const total = subtotal - discount - cashBack;
         const amountPaid = total;
-
+    
         const saleData = {
             saleId: generateSaleId(),
             date: new Date().toISOString().slice(0, 19).replace("T", " "),
@@ -196,22 +229,63 @@ const BillList = () => {
                 price: item.price,
                 quantity: item.quantity,
             }))
-        };        
-
+        };
+    
         try {
             await axiosInstance.post(`/api/addsale?store=${selectedStore}`, saleData);
+            console.log('store ',selectedStore)
+            console.log('data ',saleData)
             toast.success("Sale recorded successfully!");
+            const soldqty = saleData.items.map(item => item.quantity)[0];
+            //console.log(soldqty);
+    
+            for (const cartItem of cart) {
+                const saleItem = saleData.items.find(item => item.item_code === cartItem.item_code);
             
-            isPrint === "done" ? generatePDF(cart, saleData) : "";
+                if (saleItem) {
+                    const availableStock = stockQuantities[cartItem.item_code]
+                    const soldQuantity = cartItem.quantity;
+            
+                    const remainingStock = availableStock - soldQuantity;
+                    console.log('rstock',remainingStock)
+            
+                    if (remainingStock < 0) {
+                        toast.error(`Stock for ${saleItem.name} is insufficient!`);
+                        return;
+                    }
+            
+                    console.log('Remaining Stock:', remainingStock, 'Available Stock:', availableStock, 'Sold Quantity:', soldQuantity);
+            
+                    if (cartItem._id) {
+                        try {
 
+                            await axiosInstance.put(`/api/update/${cartItem._id}?store=${selectedStore}`, {
+                                quantity: remainingStock ?? 0
+                            });
+            
+                            console.log(`Stock updated for ${saleItem.name}, remaining: ${remainingStock}`);
+                        } catch (error) {
+                            console.error('Error updating stock:', error);
+                            toast.error(`Failed to update stock for ${saleItem.name}.`);
+                        }
+                    }
+                } else {
+                    toast.error(`Item ${cartItem.item_code} not found in sale data.`);
+                }
+            }
+    
+            if (isPrint === "done") {
+                generateExcel(cart, saleData);
+            }
+    
             setCart([]);
-
             toast.success("Transaction completed!");
         } catch (error) {
             console.error("Error in handleDone:", error);
             toast.error("Transaction failed. Please try again.");
         }
     };
+    
 
 
     const handleRemove = (itemId) => {

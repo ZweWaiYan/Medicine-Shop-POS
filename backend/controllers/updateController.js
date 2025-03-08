@@ -77,7 +77,7 @@ async function update(req, res) {
         if (price) updateFields.price = price;
         if (expire_date) updateFields.expire_date = expire_date;
         if (alert_date) updateFields.alert_date = alert_date;
-        if (quantity) updateFields.quantity = quantity;
+        if (quantity !== undefined) updateFields.quantity = quantity;
         if (remark) updateFields.remark = remark;
         if (image_path) updateFields.image_path = image_path;
 
@@ -91,6 +91,7 @@ async function update(req, res) {
                 }
             }
         }
+        console.log(updateFields.quantity)
 
         const result = await collection.updateOne(
             { _id: new ObjectId(item_id) },
