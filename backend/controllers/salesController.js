@@ -162,63 +162,73 @@ async function fetchsales(req, res) {
 }
 
 //monthlyreport
-async function getMonthlyReport(req, res) {
+async function getyearlyreport(req, res) {
     const client = await connectDB();
     const dbName = getDbName(req);
     const database = client.db(dbName);
     const salesCollection = database.collection("sales");
 
-    let { store, month, year } = req.query;
-    month = parseInt(month);
+    let { store, year } = req.query;
     year = parseInt(year);
 
-    if (!month || !year || month < 1 || month > 12) {
-        return res.status(400).json({ message: "Invalid month or year" });
+    if (!year || year < 2000 || year > new Date().getFullYear()) {
+        return res.status(400).json({ message: "Invalid year" });
     }
 
     try {
-        const monthStr = month < 10 ? `0${month}` : `${month}`;
         const yearStr = `${year}`;
 
         const sales = await salesCollection.aggregate([
             {
                 $match: {
-                    date: { $regex: `^${yearStr}-${monthStr}` }
+                    date: { $regex: `^${yearStr}` }
                 }
             },
             {
                 $group: {
-                    _id: null,
+                    _id: { $substr: ["$date", 5, 2] },
                     totalSales: { $sum: 1 },
-                    totalRevenue: { $sum: { $toInt: "$total" } }, 
+                    totalRevenue: { $sum: { $toInt: "$total" } },
                     totalDiscount: { $sum: { $toInt: "$discount" } },
                     totalCashBack: { $sum: { $toInt: "$cashBack" } },
                     totalAmountPaid: { $sum: { $toInt: "$amountPaid" } },
-                    itemsSold: { $push: "$items" }
+                    //itemsSold: { $push: "$items" }
                 }
+            },
+            {
+                $sort: { "_id": 1 }
             }
         ]).toArray();
 
         if (sales.length === 0) {
-            return res.status(404).json({ message: "No sales found for the given month and year" });
+            return res.status(404).json({ message: "No sales found for the given year" });
         }
+
+        const monthlyReport = Array.from({ length: 12 }, (_, i) => {
+            const monthIndex = (i + 1).toString().padStart(2, "0");
+            const monthData = sales.find(s => s._id === monthIndex);
+            return {
+                month: parseInt(monthIndex),
+                totalSales: monthData ? monthData.totalSales : 0,
+                totalRevenue: monthData ? monthData.totalRevenue : 0,
+                totalDiscount: monthData ? monthData.totalDiscount : 0,
+                totalCashBack: monthData ? monthData.totalCashBack : 0,
+                totalAmountPaid: monthData ? monthData.totalAmountPaid : 0,
+                //itemsSold: monthData ? monthData.itemsSold.flat() : []
+            };
+        });
 
         res.json({
             store,
-            month,
             year,
-            totalSales: sales[0].totalSales,
-            totalRevenue: sales[0].totalRevenue,
-            totalDiscount: sales[0].totalDiscount,
-            totalCashBack: sales[0].totalCashBack,
-            totalAmountPaid: sales[0].totalAmountPaid,
-            itemsSold: sales[0].itemsSold.flat()
+            monthlyReport
         });
     } catch (error) {
-        console.error("Error generating monthly report:", error);
-        res.status(500).json({ message: "Error generating monthly report" });
+        console.error("Error generating yearly report:", error);
+        res.status(500).json({ message: "Error generating yearly report" });
     }
 }
+
 
 //topsellers
 async function gettopsellers(req, res) {
@@ -285,6 +295,6 @@ module.exports = {
     deletesale,
     fetchsalebyId,
     fetchsales,
-    getMonthlyReport,
+    getyearlyreport,
     gettopsellers
 };
