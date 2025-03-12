@@ -9,11 +9,11 @@ const getDbName = require('./getDBname');
 const saleSchema = Joi.object({
     saleId: Joi.string().required(),
     date: Joi.date().iso().required(),
-    subtotal: Joi.number().integer().min(0).required(),
+    subtotal: Joi.number().integer().min(1).required(),
     discount: Joi.number().integer().min(0).default(0),
     cashBack: Joi.number().integer().min(0).default(0),
-    total: Joi.number().integer().min(0).required(),
-    amountPaid: Joi.number().integer().min(0).required(),
+    total: Joi.number().integer().min(1).required(),
+    amountPaid: Joi.number().integer().min(1).required(),
     remainingBalance: Joi.number().integer().min(0).default(0),
     items: Joi.array()
         .items(
@@ -21,7 +21,7 @@ const saleSchema = Joi.object({
                 item_code: Joi.string().allow(null, ""),
                 barcode: Joi.string().allow(null, ""),
                 name: Joi.string().required(),
-                price: Joi.number().integer().min(0).required(),
+                price: Joi.number().integer().min(1).required(),
                 quantity: Joi.number().integer().min(1).required(),
             })
         )
@@ -45,7 +45,6 @@ async function addsale(req, res) {
     }
 
     try {
-        // Insert sale into MongoDB
         const sale = { saleId, date, subtotal, discount, cashBack, total, amountPaid, remainingBalance, items };
         const result = await salesCollection.insertOne(sale);
 
@@ -125,11 +124,6 @@ async function fetchsalebyId(req, res) {
     const salesCollection = database.collection("sales");
 
     const { saleId } = req.params;
-/*
-    if (!ObjectId.isValid(saleId)) {
-        console.log('error')
-        return res.status(400).json({ message: "Invalid sale ID format" });
-    }*/
 
     try {
         const sale = await salesCollection.findOne({ saleId: saleId });
@@ -167,10 +161,130 @@ async function fetchsales(req, res) {
     }
 }
 
+//monthlyreport
+async function getMonthlyReport(req, res) {
+    const client = await connectDB();
+    const dbName = getDbName(req);
+    const database = client.db(dbName);
+    const salesCollection = database.collection("sales");
+
+    let { store, month, year } = req.query;
+    month = parseInt(month);
+    year = parseInt(year);
+
+    if (!month || !year || month < 1 || month > 12) {
+        return res.status(400).json({ message: "Invalid month or year" });
+    }
+
+    try {
+        const monthStr = month < 10 ? `0${month}` : `${month}`;
+        const yearStr = `${year}`;
+
+        const sales = await salesCollection.aggregate([
+            {
+                $match: {
+                    date: { $regex: `^${yearStr}-${monthStr}` }
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalSales: { $sum: 1 },
+                    totalRevenue: { $sum: { $toInt: "$total" } }, 
+                    totalDiscount: { $sum: { $toInt: "$discount" } },
+                    totalCashBack: { $sum: { $toInt: "$cashBack" } },
+                    totalAmountPaid: { $sum: { $toInt: "$amountPaid" } },
+                    itemsSold: { $push: "$items" }
+                }
+            }
+        ]).toArray();
+
+        if (sales.length === 0) {
+            return res.status(404).json({ message: "No sales found for the given month and year" });
+        }
+
+        res.json({
+            store,
+            month,
+            year,
+            totalSales: sales[0].totalSales,
+            totalRevenue: sales[0].totalRevenue,
+            totalDiscount: sales[0].totalDiscount,
+            totalCashBack: sales[0].totalCashBack,
+            totalAmountPaid: sales[0].totalAmountPaid,
+            itemsSold: sales[0].itemsSold.flat()
+        });
+    } catch (error) {
+        console.error("Error generating monthly report:", error);
+        res.status(500).json({ message: "Error generating monthly report" });
+    }
+}
+
+//topsellers
+async function gettopsellers(req, res) {
+    const client = await connectDB();
+    const dbName = getDbName(req);
+    const database = client.db(dbName);
+    const salesCollection = database.collection("sales");
+
+    let { store, month, year } = req.query;
+    month = parseInt(month);
+    year = parseInt(year);
+
+    if (!month || !year || month < 1 || month > 12) {
+        return res.status(400).json({ message: "Invalid month or year" });
+    }
+
+    try {
+        const monthStr = month < 10 ? `0${month}` : `${month}`;
+        const yearStr = `${year}`;
+
+        const bestSellers = await salesCollection.aggregate([
+            {
+                $match: {
+                    date: { $regex: `^${yearStr}-${monthStr}` }
+                }
+            },
+            {
+                $unwind: "$items"
+            },
+            {
+                $group: {
+                    _id: "$items.item_code",
+                    name: { $first: "$items.name" },
+                    totalQuantity: { $sum: { $toInt: "$items.quantity" } }
+                }
+            },
+            {
+                $sort: { totalQuantity: -1 }
+            },
+            {
+                $limit: 5
+            }
+        ]).toArray();
+
+        if (bestSellers.length === 0) {
+            return res.status(404).json({ message: "No sales data available for the given month and year" });
+        }
+
+        res.json({
+            store,
+            month,
+            year,
+            top5BestSellers: bestSellers
+        });
+    } catch (error) {
+        console.error("Error fetching best sellers:", error);
+        res.status(500).json({ message: "Error fetching best sellers" });
+    }
+}
+
 module.exports = {
     addsale,
     updatesale,
     deletesale,
     fetchsalebyId,
     fetchsales,
+    getMonthlyReport,
+    gettopsellers
 };
