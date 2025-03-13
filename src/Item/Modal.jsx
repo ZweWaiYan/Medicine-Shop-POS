@@ -29,6 +29,7 @@ const Modal = ({ showModal, closeModal, item, onSave, tableData, selectedStore }
   const { data: category, isLoading, isError, refetch } = useQuery({
     queryKey: ["category", selectedStore],
     queryFn: () => fetchCategories(selectedStore),
+    enabled: !!selectedStore,
   });
 
   const addMutation = useMutation({

@@ -29,31 +29,68 @@ const saleSchema = Joi.object({
         .required(),
 });
 
-// Add sale
 async function addsale(req, res) {
     const client = await connectDB();
     const dbName = getDbName(req);
     const database = client.db(dbName);
     const salesCollection = database.collection("sales");
+    const productsCollection = database.collection("items");
 
-    const { saleId, date, subtotal, discount, cashBack, total, amountPaid, remainingBalance, items } = req.body;
-    const { error } = saleSchema.validate({saleId, date, subtotal, discount, cashBack, total, amountPaid, remainingBalance, items });
-
-    if (error) {
-        console.log(error)
-        return res.status(400).json({ message: "Invalid input", errors: error.details });
-    }
+    const { saleId, date, discount, cashBack, items } = req.body;
 
     try {
-        const sale = { saleId, date, subtotal, discount, cashBack, total, amountPaid, remainingBalance, items };
-        const result = await salesCollection.insertOne(sale);
+        const itemCodes = items.map(item => item.item_code);
+        const products = await productsCollection.find({ item_code: { $in: itemCodes } }).toArray();
 
+        let subtotal = 0;
+        let validatedItems = [];
+
+        for (const item of items) {
+            const product = products.find(p => p.item_code === item.item_code);
+            if (!product) {
+                return res.status(400).json({ message: `Invalid item: ${item.name}` });
+            }
+
+            const itemSubtotal = product.price * item.quantity;
+            subtotal += itemSubtotal;
+
+            validatedItems.push({
+                item_code: item.item_code,
+                barcode: item.barcode,
+                name: item.name,
+                price: product.price,
+                quantity: item.quantity,
+            });
+        }
+
+        const validDiscount = Math.max(0, Math.min(discount, subtotal));
+        const validCashBack = Math.max(0, Math.min(cashBack, subtotal - validDiscount));
+        const total = subtotal - validDiscount - validCashBack;
+        const amountPaid = total;
+        const remainingBalance = total - amountPaid;
+
+        const saleData = {
+            saleId,
+            date,
+            subtotal,
+            discount: validDiscount,
+            cashBack: validCashBack,
+            total,
+            amountPaid,
+            remainingBalance,
+            items: validatedItems,
+        };
+
+        const { error } = saleSchema.validate(saleData);
+        if (error) {
+            return res.status(400).json({ message: "Invalid input", errors: error.details });
+        }
+
+        const result = await salesCollection.insertOne(saleData);
         res.status(201).json({ message: "Sale recorded successfully", saleId: result.insertedId });
+
     } catch (error) {
         console.error("Error processing sale:", error);
-        if (error.code === 8000) {
-            return res.status(403).send({ message: "You dont have permission on this database." });
-        }
         res.status(500).json({ message: "Error processing sale", error });
     }
 }

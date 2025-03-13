@@ -13,7 +13,6 @@ function getDbName(req) {
     const { error } = dbschema.validate(selectedStore);
 
     if (error) {
-        console.log('aaaa')
         throw new Error("Invalid store name provided.");
 
     }
