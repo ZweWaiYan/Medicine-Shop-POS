@@ -47,8 +47,7 @@ const AdminRegister = () => {
             setTimeout(() => {
                 navigate("/");
             }, 2000);
-        } catch (err) {
-            console.log()
+        } catch (err) {            
             setError(err.response.data.message || "Registration failed");
         }
     };

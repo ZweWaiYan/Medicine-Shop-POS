@@ -164,7 +164,7 @@ const FilterModal = ({ showModal, closeModal, handleFilter }) => {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={handleCancel}
-                                className="px-4 py-2 bg-[#B9E5E6] text-black rounded"
+                                className="px-4 py-2 bg-[#B9E5E6] text-black rounded w-[80px] shadow-md"
                             >
                                 Cancel
                             </motion.button>
@@ -172,7 +172,7 @@ const FilterModal = ({ showModal, closeModal, handleFilter }) => {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={handleFilters}
-                                className="px-4 py-2 bg-[#04C9D1] text-black rounded shadow-md"
+                                className="px-4 py-2 bg-[#04C9D1] text-black rounded shadow-md w-[80px]"
                             >
                                 Filter
                             </motion.button>

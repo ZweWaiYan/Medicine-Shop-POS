@@ -26,8 +26,7 @@ import { jwtDecode } from "jwt-decode";
 const fetchSaleData = async ({ queryKey }) => {
     const [, selectedStore] = queryKey;
     if (!selectedStore) return [];
-    const { data } = await axiosInstance.get(`/api/allitems?store=${selectedStore}`);
-    console.log(data);
+    const { data } = await axiosInstance.get(`/api/allitems?store=${selectedStore}`);    
     return data;
 };
 
@@ -45,6 +44,12 @@ const generateSaleId = () => {
 const BillList = () => {
     const [selectedStore, setSelectedStore] = useState("");
     const [itemQuantity, setItemQuantity] = useState({});
+
+    const inputRefs = useRef({
+        discount: null,
+        cashback: null,
+        Debit: null,
+    })
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -74,9 +79,8 @@ const BillList = () => {
             return acc;
         }, {});
     
-        console.log("Stock Quantities:", stockQuantities);
-    }
-    console.log()
+        // console.log("Stock Quantities:", stockQuantities);
+    }    
 
     const searchInputRef = useRef(null);
     const printButtonRef = useRef(null);
@@ -113,9 +117,10 @@ const BillList = () => {
             return;
         }
     
-        const existingItemIndex = cart.findIndex(cartItem => cartItem.barcode === item.barcode || cartItem.item_code === item.item_code);
-    
+        const existingItemIndex = cart.findIndex(cartItem => cartItem.barcode === item.barcode || cartItem.item_code === item.item_code);        
+
         setCart(prevCart => {
+
             if (existingItemIndex !== -1) {
                 const existingItem = prevCart[existingItemIndex];
                 if (existingItem.quantity + foundedquantity > item.quantity) {
@@ -183,20 +188,17 @@ const BillList = () => {
     };
 
 
-    const handleKeyDown = (event, nextRef) => {
-        event.preventDefault();
+    const handleKeyDown = (event, nextRef) => {        
 
         if (event.key === "Tab") {
             event.preventDefault();
-            nextRef?.current?.focus();
-            // if (nextRef.current.id === "done") {
-            //     setIsPrint(false);
-            // }            
+            nextRef?.current?.focus();                  
         } else if (event.key === "Enter") {
-            event.preventDefault();
-            // setShowPurchaseModal(true);            
+            event.preventDefault();            
             handleDone(nextRef.current.id);
-        }
+
+
+        } 
     };
 
     const handleDone = async (isPrint) => {
@@ -205,13 +207,14 @@ const BillList = () => {
         if (cart.length === 0) {
             toast.error("Cart is empty!");
             return;
-        }
+        }        
     
         const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-        const discount = 0;
-        const cashBack = 0;
+        const discount = inputRefs.current.discount.value;
+        const cashBack = inputRefs.current.cashback.value;        
         const total = subtotal - discount - cashBack;
-        const amountPaid = total;
+        const debit = inputRefs.current.Debit.value;
+        const amountPaid = total;        
     
         const saleData = {
             saleId: generateSaleId(),
@@ -232,12 +235,9 @@ const BillList = () => {
         };
     
         try {
-            await axiosInstance.post(`/api/addsale?store=${selectedStore}`, saleData);
-            console.log('store ',selectedStore)
-            console.log('data ',saleData)
+            await axiosInstance.post(`/api/addsale?store=${selectedStore}`, saleData);        
             toast.success("Sale recorded successfully!");
-            const soldqty = saleData.items.map(item => item.quantity)[0];
-            //console.log(soldqty);
+            const soldqty = saleData.items.map(item => item.quantity)[0];            
     
             for (const cartItem of cart) {
                 const saleItem = saleData.items.find(item => item.item_code === cartItem.item_code);
@@ -246,15 +246,14 @@ const BillList = () => {
                     const availableStock = stockQuantities[cartItem.item_code]
                     const soldQuantity = cartItem.quantity;
             
-                    const remainingStock = availableStock - soldQuantity;
-                    console.log('rstock',remainingStock)
+                    const remainingStock = availableStock - soldQuantity;                    
             
                     if (remainingStock < 0) {
                         toast.error(`Stock for ${saleItem.name} is insufficient!`);
                         return;
                     }
             
-                    console.log('Remaining Stock:', remainingStock, 'Available Stock:', availableStock, 'Sold Quantity:', soldQuantity);
+                    // console.log('Remaining Stock:', remainingStock, 'Available Stock:', availableStock, 'Sold Quantity:', soldQuantity);
             
                     if (cartItem._id) {
                         try {
@@ -263,7 +262,7 @@ const BillList = () => {
                                 quantity: remainingStock ?? 0
                             });
             
-                            console.log(`Stock updated for ${saleItem.name}, remaining: ${remainingStock}`);
+                            // console.log(`Stock updated for ${saleItem.name}, remaining: ${remainingStock}`);
                         } catch (error) {
                             console.error('Error updating stock:', error);
                             toast.error(`Failed to update stock for ${saleItem.name}.`);
@@ -277,14 +276,21 @@ const BillList = () => {
             if (isPrint === "done") {
                 generateExcel(cart, saleData);
             }
-    
+            
             setCart([]);
+            clearInput();
             toast.success("Transaction completed!");
         } catch (error) {
             console.error("Error in handleDone:", error);
             toast.error("Transaction failed. Please try again.");
         }
     };
+
+    const clearInput = () => {
+        inputRefs.current.discount.value = 0;
+        inputRefs.current.cashback.value = 0;
+        inputRefs.current.Debit.value = 0;
+    }
     
 
 
@@ -363,7 +369,7 @@ const BillList = () => {
                     <table className="min-w-full border-collapse border border-gray-300">
                         <thead>
                             <tr>
-                                {["ItemCode", "Name", "quantity", "Price", "Actions"].map((heading) => (
+                                {["ItemCode", "Name", "Quantity", "Price", "Actions"].map((heading) => (
                                     <th key={heading} className="px-2 md:px-4 py-2 text-sm md:text-lg text-center  bg-[#DBE8F8]">
                                         {heading}
                                     </th>
@@ -419,6 +425,8 @@ const BillList = () => {
                         </div>
                         <div className="items-center rounded-md bg-white pl-3 outline -outline-offset-1 outline-gray-300 has-[*:focus-within]:outline-2 has-[*:focus-within]:-outline-offset-2 has-[*:focus-within]:outline-indigo-600">
                             <input
+                                ref={(e) => (inputRefs.current.discount = e)}
+                                name="discount"
                                 type="text"
                                 placeholder="Enter Discount"
                                 className="block w-full h-[50px] py-1.5 pr-3 pl-1 text-base  text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
@@ -432,8 +440,10 @@ const BillList = () => {
                         <div>
                             <div className="items-center rounded-md bg-white pl-3 outline -outline-offset-1 outline-gray-300 has-[*:focus-within]:outline-2 has-[*:focus-within]:-outline-offset-2 has-[*:focus-within]:outline-indigo-600">
                                 <input
+                                    ref={(e) => (inputRefs.current.cashback = e)}
+                                    name="Cashback"
                                     type="text"
-                                    placeholder="Enter Discount"
+                                    placeholder="Enter Cashback"
                                     className="block w-full w h-[50px] py-1.5 pr-3 pl-1 text-base  text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                                 />
                             </div>
@@ -447,8 +457,11 @@ const BillList = () => {
                             <div>
                                 <div className="items-center rounded-md bg-white pl-3 outline -outline-offset-1 outline-gray-300 has-[*:focus-within]:outline-2 has-[*:focus-within]:-outline-offset-2 has-[*:focus-within]:outline-indigo-600">
                                     <input
+                                        ref={(e) => (inputRefs.current.Debit = e)}
+                                        name="Debit"
                                         type="text"
-                                        placeholder="Enter Discount"
+                                        placeholder="Enter Debit"
+                                        onKeyDown={(e) => handleKeyDown(e, printButtonRef)}
                                         className="block w-full h-[50px] py-1.5 pr-3 pl-1 text-base  text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                                     />
                                 </div>

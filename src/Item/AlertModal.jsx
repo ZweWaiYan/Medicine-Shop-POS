@@ -50,7 +50,7 @@ const AlertModal = ({ showModal, closeModal, expiredItems = [], lowStockItems = 
   
             <button
               onClick={closeModal}
-              className="mt-4 w-full py-2 bg-blue-500 text-white rounded-md hover:bg-blue-400"
+              className="mt-4 w-full py-2 bg-[#4FB1B4] text-white rounded-md hover:bg-[#5cced2]"
             >
               Close
             </button>

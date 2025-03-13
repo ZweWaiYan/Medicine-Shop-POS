@@ -32,40 +32,36 @@ const ItemList = () => {
   const [showAlertModal, setShowAlertModal] = useState(false);
   const [lowStockItems, setLowStockItems] = useState([]);
   useEffect(() => {
-      const token = localStorage.getItem("token");
-      if (token) {
-          try {
-              const decodedToken = jwtDecode(token);
-              if(decodedToken.role !== 'admin'){
-                  setSelectedStore(decodedToken.branch);
-              }else{
-                setSelectedStore('storeA')
-              }
-              
-          } catch (error) {
-              console.error("Invalid token:", error);
-          }
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token);
+        if (decodedToken.role !== 'admin') {
+          setSelectedStore(decodedToken.branch);
+        } else {
+          setSelectedStore('storeA')
+        }
+
+      } catch (error) {
+        console.error("Invalid token:", error);
       }
+    }
   }, []);
-  
+
   const { data: saleData, isLoading, error } = useQuery({
     queryKey: ["saleData", selectedStore],
     queryFn: () => fetchSaleData(selectedStore),
     enabled: selectedStore !== "",
-  });
-
-  console.log(saleData)
+  });  
+  
   useEffect(() => {
     if (saleData) {
-      console.log(saleData);
-  
       const expired = saleData.filter(item => item.is_expired === 1);
       setExpiredItems(expired);
-  
+
       const lowStock = saleData.filter(item => item.quantity <= 5);
-      console.log('lowstock', lowStock);
       setLowStockItems(lowStock);
-  
+
       if (expired.length > 0 || lowStock.length > 0) {
         setShowAlertModal(true);
       }
@@ -162,7 +158,7 @@ const ItemList = () => {
     return matchesSearchText && matchesFilters;
   }).sort((a, b) => {
     return Number(filteredDate.selectedQty) === 1 ? b.quantity - a.quantity : a.quantity - b.quantity;
-  }):[];
+  }) : [];
 
   const handleFilterFunc = (selectedExpireDate, selectedPrice, selectedQty, selectedExpired, selectedAlerted, selectedCategory) => {
     setFilteredDate({ selectedExpireDate, selectedPrice, selectedQty, selectedExpired, selectedAlerted, selectedCategory });
@@ -173,27 +169,33 @@ const ItemList = () => {
       <div className="flex flex-col md:flex-row justify-between pb-7">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pr-3 w-full">
           <div>
-            <div className="flex md:flex-row flex-col w-full">
-              <select
-                value={selectedStore}
-                onChange={(e) => setSelectedStore(e.target.value)}
-                className="w-full h-[60px]  flex items-center rounded-md bg-white pr-6 pl-3 outline -outline-offset-1 outline-[#4FB1B4] has-[*:focus-within]:outline-2 has-[*:focus-within]:-outline-offset-2 has-[*:focus-within]:outline-indigo-600"
-              >
-                <option value="storeA">Store A</option>
-                <option value="storeB">Store B</option>                
-              </select>
+            <div className="flex md:flex-row flex-col w-full">            
+              <div className="w-full mr-3 flex items-center rounded-md bg-white pl-3 outline -outline-offset-1 outline-[#4FB1B4] has-[*:focus-within]:outline-2 has-[*:focus-within]:-outline-offset-2 has-[*:focus-within]:outline-indigo-600">
+                <select
+                  value={selectedStore}
+                  onChange={(e) => setSelectedStore(e.target.value)}
+                  className="col-start-1 p-3 row-start-1 w-full  border-gray-300 appearance-none py-1.5 pr-7 text-base text-gray-500 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
+                >
+                  <option value="storeA">Store A</option>
+                  <option value="storeB">Store B</option>
+                </select>
+                <FaAngleDown
+                  aria-hidden="true"
+                  className="pointer-events-none col-start-1 row-start-1 pl-2 mr-3 size-5 self-center justify-self-end text-gray-500 sm:size-4"
+                />
+              </div>
               <div className="w-full mt-3 md:mt-0 ml-0 md:ml-3 flex h-[60px] items-center rounded-md bg-white pl-3 outline -outline-offset-1 outline-[#4FB1B4] has-[*:focus-within]:outline-2 has-[*:focus-within]:-outline-offset-2 has-[*:focus-within]:outline-indigo-600">
                 <input
                   type="text"
                   placeholder="Search....."
                   onChange={(e) => { setSearchText(e.target.value); }}
-                  className="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
+                  className="block min-w-0 grow py-1.5 pr-1 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                 />
                 <div className="grid shrink-0 grid-cols-1 focus-within:relative">
                   <select
                     value={filterSearchText}
                     onChange={(e) => { setFilterSearchText(e.target.value) }}
-                    className="col-start-1 row-start-1 w-full appearance-none rounded-md py-1.5 pr-7 pl-3 text-base text-gray-500 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
+                    className="col-start-1 row-start-1 w-full appearance-none rounded-md py-1.5 pr-1 mr-5 pl-1 text-base text-gray-500 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                   >
                     <option value="item_code">Item Code</option>
                     <option value="Barcode">Barcode</option>
@@ -202,7 +204,7 @@ const ItemList = () => {
                   </select>
                   <FaAngleDown
                     aria-hidden="true"
-                    className="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-gray-500 sm:size-4"
+                    className="pointer-events-none col-start-1 row-start-1 mr-2 size-2 self-center justify-self-end text-gray-500 "
                   />
                 </div>
               </div>
@@ -239,10 +241,10 @@ const ItemList = () => {
         <CategoryModal showModal={showCategoryModal} selectedStore={selectedStore} closeModal={() => setShowCategoryModal(false)} />
       )}
       <AlertModal
-      showModal={showAlertModal}
-      closeModal={() => setShowAlertModal(false)}
-      expiredItems={expiredItems}
-      lowStockItems={lowStockItems}
+        showModal={showAlertModal}
+        closeModal={() => setShowAlertModal(false)}
+        expiredItems={expiredItems}
+        lowStockItems={lowStockItems}
       />
       {/* Table */}
       <div className="overflow-auto">
@@ -292,7 +294,12 @@ const ItemList = () => {
                   <td className="w-1/10 px-2 md:px-4 py-2 border text-center text-sm">
                     {data.category}
                   </td>
-                  <td className="w-1/10 px-2 md:px-4 py-2 border text-center text-sm">
+                  <td className={`w-1/10 px-2 md:px-4 py-2 border text-center text-sm ${data.quantity === 0
+                    ? "bg-[#86909C] text-black"
+                    : data.quantity <= 5
+                      ? "bg-[#ADCBEF] text-black"
+                      : ""
+                    }`}>
                     {data.quantity}
                   </td>
                   <td className="w-1/10 px-2 md:px-4 py-2 border text-center text-sm">

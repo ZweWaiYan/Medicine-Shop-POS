@@ -48,12 +48,12 @@ const BillReport = () => {
     selectedStartDate: null,
     selectedEndDate: null,
     selectedAmount: null,
-  });
+  });  
 
   const { data: saleData = [], isLoading, error } = useQuery({
     queryKey: ["saleData", storeData],
     queryFn: fetchSaleData,
-  });
+  });  
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
@@ -205,7 +205,7 @@ const BillReport = () => {
                   <td className="px-2 md:px-4 py-2 border text-center border-gray-300">
                     <div className="flex flex-col md:flex-row gap-2 justify-center items-center">
                       <button
-                        className="px-3 py-1 md:px-4 md:py-2 bg-green-500 text-white hover:bg-green-400 rounded text-xs md:text-sm"
+                        className="px-3 py-1 md:px-4 md:py-2 bg-[#6B7B96] text-white hover:bg-[#9db3d8] rounded text-xs md:text-sm"
                         onClick={() => handleDetail(data.saleId)}
                       >
                         <img className="w-5" src={detail} alt="" />
